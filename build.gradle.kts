@@ -56,9 +56,6 @@ tasks.processResources {
 tasks.shadowJar {
     archiveBaseName.set("TheTowers")
     archiveClassifier.set("")
-
-    // Temporary
-    destinationDirectory.set(file("D:/Serwery/dev/FemboyowoWD/plugins"))
 }
 
 tasks.test {
