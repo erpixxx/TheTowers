@@ -6,9 +6,14 @@ import dev.erpix.thetowers.command.dev.ShowAttributesCmd;
 import dev.erpix.thetowers.command.dev.StatsCmd;
 import dev.erpix.thetowers.listener.EntityListener;
 import dev.erpix.thetowers.listener.PlayerListener;
-import dev.erpix.thetowers.model.*;
+import dev.erpix.thetowers.model.game.GameMap;
+import dev.erpix.thetowers.model.game.GameSession;
+import dev.erpix.thetowers.model.game.GameTeam;
+import dev.erpix.thetowers.model.manager.PlayerManager;
+import dev.erpix.thetowers.model.manager.ProfileManager;
 import dev.erpix.thetowers.model.tablist.TabManager;
 import dev.erpix.thetowers.util.Components;
+import dev.erpix.thetowers.util.OrderedAttackerCache;
 import me.libraryaddict.disguise.LibsDisguises;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.event.EventBus;
@@ -36,12 +41,12 @@ public class TheTowers {
     private final Plugin plugin;
     private final LibsDisguises libsDisguises;
     private final CommandRegistrar commandRegistrar;
-    private final Map<String, TMap> maps = new HashMap<>();
+    private final Map<String, GameMap> maps = new HashMap<>();
     private Location spawnLocation;
-    private TPlayerManager playerManager;
+    private PlayerManager playerManager;
     private ProfileManager profileManager;
     private TabManager tabManager;
-    private TGame game;
+    private GameSession game;
 
     @SuppressWarnings("UnstableApiUsage")
     public TheTowers(@NotNull Plugin plugin) {
@@ -121,15 +126,15 @@ public class TheTowers {
                 continue;
             }
 
-            Set<TTeam.Color> teams = teamsSection.getKeys(false).stream().map(
-                    t -> TTeam.Color.valueOf(t.toUpperCase(Locale.ROOT))).collect(Collectors.toSet());
-            TMap.TeamSetup teamSetup = TMap.TeamSetup.from(teams.size());
+            Set<GameTeam.Color> teams = teamsSection.getKeys(false).stream().map(
+                    t -> GameTeam.Color.valueOf(t.toUpperCase(Locale.ROOT))).collect(Collectors.toSet());
+            GameMap.TeamSetup teamSetup = GameMap.TeamSetup.from(teams.size());
             if (teamSetup == null) {
                 logger.error(Components.color("<red>Invalid team setup for map '" + map + "'!"));
                 continue;
             }
-            Map<TTeam.Color, Location> heartLocations = new EnumMap<>(TTeam.Color.class);
-            Map<TTeam.Color, Location> spawnLocations = new EnumMap<>(TTeam.Color.class);
+            Map<GameTeam.Color, Location> heartLocations = new EnumMap<>(GameTeam.Color.class);
+            Map<GameTeam.Color, Location> spawnLocations = new EnumMap<>(GameTeam.Color.class);
             for (var team : teams) {
                 ConfigurationSection singleTeamSection = teamsSection.getConfigurationSection(team.toString());
                 if (singleTeamSection == null) {
@@ -162,8 +167,8 @@ public class TheTowers {
 
             Location waitingRoomLocation = new Location(world, waitingRoomX, waitingRoomY, waitingRoomZ, (float) waitingRoomYaw, (float) waitingRoomPitch);
 
-            TMap tMap = new TMap(map, teamSetup, waitingRoomLocation, spawnLocations, heartLocations, world);
-            this.maps.put(map, tMap);
+            GameMap gameMap = new GameMap(map, teamSetup, waitingRoomLocation, spawnLocations, heartLocations, world);
+            this.maps.put(map, gameMap);
         }
         if (this.maps.isEmpty()) {
             logger.error(Components.color("<red>No valid maps found in the configuration!"));
@@ -174,7 +179,7 @@ public class TheTowers {
                     .collect(Collectors.joining(", ")));
         }
 
-        game = new TGame();
+        game = new GameSession();
         this.maps.values().stream().findFirst().ifPresent(tMap -> {
             game.setMap(tMap);
             logger.info(Components.color("<green>Game map set to: <white>" + tMap.getName()));
@@ -183,7 +188,7 @@ public class TheTowers {
         registerCommands();
 
         profileManager = new ProfileManager();
-        playerManager = new TPlayerManager();
+        playerManager = new PlayerManager();
         Bukkit.getOnlinePlayers().forEach(player -> {
             this.playerManager.addPlayer(player);
             this.profileManager.load(player.getName());
@@ -212,7 +217,7 @@ public class TheTowers {
         return libsDisguises;
     }
 
-    public @Nullable TMap getMap(String name) {
+    public @Nullable GameMap getMap(String name) {
         return maps.get(name);
     }
 
@@ -220,11 +225,11 @@ public class TheTowers {
         return spawnLocation;
     }
 
-    public @NotNull Collection<TMap> getMaps() {
+    public @NotNull Collection<GameMap> getMaps() {
         return maps.values();
     }
 
-    public @NotNull TPlayerManager getPlayerManager() {
+    public @NotNull PlayerManager getPlayerManager() {
         return playerManager;
     }
 
@@ -236,7 +241,7 @@ public class TheTowers {
         return tabManager;
     }
 
-    public @NotNull TGame getGame() {
+    public @NotNull GameSession getGame() {
         return game;
     }
 

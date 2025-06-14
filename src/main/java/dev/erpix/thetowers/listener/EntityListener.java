@@ -3,6 +3,9 @@ package dev.erpix.thetowers.listener;
 import dev.erpix.thetowers.Key;
 import dev.erpix.thetowers.TheTowers;
 import dev.erpix.thetowers.model.*;
+import dev.erpix.thetowers.model.game.GamePlayer;
+import dev.erpix.thetowers.model.game.GameSession;
+import dev.erpix.thetowers.model.manager.PlayerManager;
 import dev.erpix.thetowers.util.Disguises;
 import dev.erpix.thetowers.util.MathUtil;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -52,8 +55,8 @@ public class EntityListener implements Listener {
     public void onDamageByEntity(EntityDamageByEntityEvent event) {
         if (event.isCancelled()) return;
 
-        TGame game = theTowers.getGame();
-        TPlayerManager playerManager = theTowers.getPlayerManager();
+        GameSession game = theTowers.getGame();
+        PlayerManager playerManager = theTowers.getPlayerManager();
         Entity damager = event.getDamager();
         Entity entity = event.getEntity();
 
@@ -110,9 +113,9 @@ public class EntityListener implements Listener {
         }
 
         // Get attacker and victim TPlayer instances
-        Optional<TPlayer> attackerTPlayer = playerManager.getPlayer(
+        Optional<GamePlayer> attackerTPlayer = playerManager.getPlayer(
                 attacker instanceof Player p ? p.getName() : "");
-        Optional<TPlayer> victimTPlayer = playerManager.getPlayer(
+        Optional<GamePlayer> victimTPlayer = playerManager.getPlayer(
                 victim instanceof Player p ? p.getName() : "");
 
         // Prevent friendly fire

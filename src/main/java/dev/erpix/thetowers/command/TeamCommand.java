@@ -4,9 +4,9 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.erpix.thetowers.TheTowers;
-import dev.erpix.thetowers.model.TGame;
-import dev.erpix.thetowers.model.TPlayer;
-import dev.erpix.thetowers.model.TTeam;
+import dev.erpix.thetowers.model.game.GamePlayer;
+import dev.erpix.thetowers.model.game.GameSession;
+import dev.erpix.thetowers.model.game.GameTeam;
 import dev.erpix.thetowers.util.Disguises;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -26,7 +26,7 @@ public class TeamCommand implements CommandBase {
 
     @Override
     public LiteralCommandNode<CommandSourceStack> create() {
-        TGame game = theTowers.getGame();
+        GameSession game = theTowers.getGame();
         return Commands.literal("team")
                 .executes(ctx -> {
                     CommandSender sender = ctx.getSource().getSender();
@@ -47,10 +47,10 @@ public class TeamCommand implements CommandBase {
                 .then(Commands.literal("create")
                         .then(Commands.argument("color", StringArgumentType.word())
                                 .suggests((ctx, builder) -> {
-                                    Set<TTeam.Color> takenColors = game.getTeams().stream()
-                                            .map(TTeam::getColor)
+                                    Set<GameTeam.Color> takenColors = game.getTeams().stream()
+                                            .map(GameTeam::getColor)
                                             .collect(Collectors.toSet());
-                                    for (TTeam.Color color : TTeam.Color.values()) {
+                                    for (GameTeam.Color color : GameTeam.Color.values()) {
                                         if (takenColors.contains(color)) continue;
                                         builder.suggest(color.name().toLowerCase());
                                     }
@@ -66,7 +66,7 @@ public class TeamCommand implements CommandBase {
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
-                                            TTeam.Color color = TTeam.Color.from(ctx.getArgument("color", String.class));
+                                            GameTeam.Color color = GameTeam.Color.from(ctx.getArgument("color", String.class));
                                             if (color == null) {
                                                 sender.sendRichMessage("<red>Nieprawidłowy kolor drużyny.");
                                                 return Command.SINGLE_SUCCESS;
@@ -78,12 +78,12 @@ public class TeamCommand implements CommandBase {
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
-                                            if (game.getStage() == TGame.Stage.WAITING || game.getStage() == TGame.Stage.IN_PROGRESS) {
+                                            if (game.getStage() == GameSession.Stage.WAITING || game.getStage() == GameSession.Stage.IN_PROGRESS) {
                                                 sender.sendRichMessage("<red>Nie można utworzyć drużyny, ponieważ gra już trwa.");
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
-                                            Optional<TTeam> sameColor = game.getTeams().stream()
+                                            Optional<GameTeam> sameColor = game.getTeams().stream()
                                                     .filter(team -> team.getColor() == color)
                                                     .findFirst();
                                             if (sameColor.isPresent()) {
@@ -91,7 +91,7 @@ public class TeamCommand implements CommandBase {
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
-                                            Optional<TTeam> sameTag = game.getTeams().stream()
+                                            Optional<GameTeam> sameTag = game.getTeams().stream()
                                                     .filter(team -> team.getTag().equalsIgnoreCase(tag))
                                                     .findFirst();
                                             if (sameTag.isPresent()) {
@@ -99,14 +99,14 @@ public class TeamCommand implements CommandBase {
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
-                                            Optional<TPlayer> optPlayer = theTowers.getPlayerManager().getPlayer(player.getName());
+                                            Optional<GamePlayer> optPlayer = theTowers.getPlayerManager().getPlayer(player.getName());
                                             if (optPlayer.isEmpty()) {
                                                 sender.sendRichMessage("<red>Coś poszło kurwesko nie tak jak powinno.");
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
-                                            TPlayer tPlayer = optPlayer.get();
-                                            TTeam newTeam = new TTeam(tPlayer, tag, color);
+                                            GamePlayer gamePlayer = optPlayer.get();
+                                            GameTeam newTeam = new GameTeam(gamePlayer, tag, color);
                                             game.addTeam(newTeam);
 
                                             sender.sendRichMessage("<green>Stworzono drużynę o nazwie o tagu <color:#" + color.getColorHex() + ">" + tag + "</color>.");
@@ -125,26 +125,26 @@ public class TeamCommand implements CommandBase {
                                 return Command.SINGLE_SUCCESS;
                             }
 
-                            Optional<TPlayer> optPlayer = theTowers.getPlayerManager().getPlayer(player.getName());
+                            Optional<GamePlayer> optPlayer = theTowers.getPlayerManager().getPlayer(player.getName());
                             if (optPlayer.isEmpty()) {
                                 sender.sendRichMessage("<red>Coś poszło kurwesko nie tak jak powinno.");
                                 return Command.SINGLE_SUCCESS;
                             }
-                            TPlayer tPlayer = optPlayer.get();
+                            GamePlayer gamePlayer = optPlayer.get();
 
-                            TTeam team = tPlayer.getTeam();
+                            GameTeam team = gamePlayer.getTeam();
                             if (team == null) {
                                 sender.sendRichMessage("<red>Nie jesteś w żadnej drużynie.");
                                 return Command.SINGLE_SUCCESS;
                             }
 
-                            if (!team.getLeader().equals(tPlayer)) {
+                            if (!team.getLeader().equals(gamePlayer)) {
                                 sender.sendRichMessage("<red>Tylko lider drużyny może ją rozwiązać.");
                                 return Command.SINGLE_SUCCESS;
                             }
 
                             game.removeTeam(team);
-                            game.addSpectator(tPlayer);
+                            game.addSpectator(gamePlayer);
                             sender.sendRichMessage("<green>Drużyna <color:#" + team.getColor().getColorHex() + ">" + team.getDisplayName() + "</color> została rozwiązana.");
                             team.getMembers().forEach(member -> {
                                 member.setTeam(null);
@@ -165,7 +165,7 @@ public class TeamCommand implements CommandBase {
                                     }
 
                                     String tag = ctx.getArgument("tag", String.class);
-                                    Optional<TTeam> optTeam = game.getTeams().stream()
+                                    Optional<GameTeam> optTeam = game.getTeams().stream()
                                             .filter(team -> team.getTag().equalsIgnoreCase(tag))
                                             .findFirst();
 
@@ -173,16 +173,16 @@ public class TeamCommand implements CommandBase {
                                         sender.sendRichMessage("<red>Drużyna o tagu " + tag + " nie istnieje.");
                                         return Command.SINGLE_SUCCESS;
                                     }
-                                    TTeam team = optTeam.get();
+                                    GameTeam team = optTeam.get();
 
-                                    Optional<TPlayer> optPlayer = theTowers.getPlayerManager().getPlayer(player.getName());
+                                    Optional<GamePlayer> optPlayer = theTowers.getPlayerManager().getPlayer(player.getName());
                                     if (optPlayer.isEmpty()) {
                                         sender.sendRichMessage("<red>Coś poszło kurwesko nie tak jak powinno.");
                                         return Command.SINGLE_SUCCESS;
                                     }
-                                    TPlayer tPlayer = optPlayer.get();
+                                    GamePlayer gamePlayer = optPlayer.get();
 
-                                    if (tPlayer.getTeam() != null) {
+                                    if (gamePlayer.getTeam() != null) {
                                         sender.sendRichMessage("<red>Już jesteś w drużynie.");
                                         return Command.SINGLE_SUCCESS;
                                     }
@@ -192,7 +192,7 @@ public class TeamCommand implements CommandBase {
                                         return Command.SINGLE_SUCCESS;
                                     }
 
-                                    team.addMember(tPlayer);
+                                    team.addMember(gamePlayer);
                                     sender.sendRichMessage("<green>Dołączono do drużyny <color:#" + team.getColor().getColorHex() + ">" + team.getDisplayName() + "</color>.");
 
                                     return Command.SINGLE_SUCCESS;
@@ -208,27 +208,27 @@ public class TeamCommand implements CommandBase {
                                 return Command.SINGLE_SUCCESS;
                             }
 
-                            Optional<TPlayer> optPlayer = theTowers.getPlayerManager().getPlayer(player.getName());
+                            Optional<GamePlayer> optPlayer = theTowers.getPlayerManager().getPlayer(player.getName());
                             if (optPlayer.isEmpty()) {
                                 sender.sendRichMessage("<red>Coś poszło kurwesko nie tak jak powinno.");
                                 return Command.SINGLE_SUCCESS;
                             }
-                            TPlayer tPlayer = optPlayer.get();
+                            GamePlayer gamePlayer = optPlayer.get();
 
-                            TTeam team = tPlayer.getTeam();
+                            GameTeam team = gamePlayer.getTeam();
                             if (team == null) {
                                 sender.sendRichMessage("<red>Nie jesteś w żadnej drużynie.");
                                 return Command.SINGLE_SUCCESS;
                             }
 
-                            if (team.getLeader().equals(tPlayer)) {
+                            if (team.getLeader().equals(gamePlayer)) {
                                 sender.sendRichMessage("<red>Nie możesz opuścić drużyny jako jej lider.");
                                 return Command.SINGLE_SUCCESS;
                             }
 
-                            team.removeMember(tPlayer);
-                            tPlayer.setTeam(null);
-                            game.addSpectator(tPlayer);
+                            team.removeMember(gamePlayer);
+                            gamePlayer.setTeam(null);
+                            game.addSpectator(gamePlayer);
                             Disguises.refresh(player);
 
                             sender.sendRichMessage("<green>Opuszczono drużynę <color:#" + team.getColor().getColorHex() + ">" + team.getDisplayName() + "</color>.");
@@ -242,19 +242,19 @@ public class TeamCommand implements CommandBase {
                                     CommandSender sender = ctx.getSource().getSender();
 
                                     if (sender instanceof Player player) {
-                                        Optional<TPlayer> optPlayer = theTowers.getPlayerManager().getPlayer(player.getName());
+                                        Optional<GamePlayer> optPlayer = theTowers.getPlayerManager().getPlayer(player.getName());
                                         if (optPlayer.isEmpty()) {
                                             return builder.buildFuture();
                                         }
-                                        TPlayer tPlayer = optPlayer.get();
+                                        GamePlayer gamePlayer = optPlayer.get();
 
-                                        TTeam team = tPlayer.getTeam();
+                                        GameTeam team = gamePlayer.getTeam();
                                         if (team == null) {
                                             return builder.buildFuture();
                                         }
 
                                         Set<String> members = team.getMembers().stream()
-                                                .map(TPlayer::getName)
+                                                .map(GamePlayer::getName)
                                                 .collect(Collectors.toSet());
                                         for (String member : members) {
                                             builder.suggest(member);
@@ -271,31 +271,31 @@ public class TeamCommand implements CommandBase {
                                         return Command.SINGLE_SUCCESS;
                                     }
 
-                                    Optional<TPlayer> optPlayer = theTowers.getPlayerManager().getPlayer(player.getName());
+                                    Optional<GamePlayer> optPlayer = theTowers.getPlayerManager().getPlayer(player.getName());
                                     if (optPlayer.isEmpty()) {
                                         sender.sendRichMessage("<red>Coś poszło kurwesko nie tak jak powinno.");
                                         return Command.SINGLE_SUCCESS;
                                     }
-                                    TPlayer tPlayer = optPlayer.get();
+                                    GamePlayer gamePlayer = optPlayer.get();
 
-                                    TTeam team = tPlayer.getTeam();
+                                    GameTeam team = gamePlayer.getTeam();
                                     if (team == null) {
                                         sender.sendRichMessage("<red>Nie jesteś w żadnej drużynie.");
                                         return Command.SINGLE_SUCCESS;
                                     }
 
-                                    if (!team.getLeader().equals(tPlayer)) {
+                                    if (!team.getLeader().equals(gamePlayer)) {
                                         sender.sendRichMessage("<red>Tylko lider drużyny może usuwać członków.");
                                         return Command.SINGLE_SUCCESS;
                                     }
 
                                     String memberName = ctx.getArgument("member", String.class);
-                                    Optional<TPlayer> optMember = theTowers.getPlayerManager().getPlayer(memberName);
+                                    Optional<GamePlayer> optMember = theTowers.getPlayerManager().getPlayer(memberName);
                                     if (optMember.isEmpty()) {
                                         sender.sendRichMessage("<red>Gracz " + memberName + " nie jest w twojej drużynie.");
                                         return Command.SINGLE_SUCCESS;
                                     }
-                                    TPlayer member = optMember.get();
+                                    GamePlayer member = optMember.get();
 
                                     if (!team.hasMember(member)) {
                                         sender.sendRichMessage("<red>Gracz " + memberName + " nie jest w twojej drużynie.");

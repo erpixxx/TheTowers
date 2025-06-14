@@ -5,7 +5,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.erpix.thetowers.TheTowers;
 import dev.erpix.thetowers.command.CommandBase;
 import dev.erpix.thetowers.model.GameStatKey;
-import dev.erpix.thetowers.model.StatisticsStorage;
+import dev.erpix.thetowers.model.StatsTracker;
 import dev.erpix.thetowers.util.Components;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -28,7 +28,7 @@ public class StatsCmd implements CommandBase {
                     }
 
                     theTowers.getPlayerManager().getPlayer(player.getName()).ifPresent(p -> {
-                        StatisticsStorage<GameStatKey> stats = p.getStats();
+                        StatsTracker<GameStatKey> stats = p.getStats();
                         p.sendMessage(Components.standard("<gray>Stats:"));
                         p.sendMessage(Components.standard("<gray>- Kills: " + stats.getStat(GameStatKey.KILLS)));
                         p.sendMessage(Components.standard("<gray>- Deaths: " + stats.getStat(GameStatKey.DEATHS)));

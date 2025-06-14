@@ -1,4 +1,4 @@
-package dev.erpix.thetowers.model;
+package dev.erpix.thetowers.model.game;
 
 import dev.erpix.thetowers.TheTowers;
 import dev.erpix.thetowers.util.Disguises;
@@ -12,18 +12,18 @@ import java.util.*;
 /**
  * Represents a team in the game.
  */
-public class TTeam {
+public class GameTeam {
 
     private final TheTowers theTowers = TheTowers.getInstance();
 
-    private final Map<String, TPlayer> members = new LinkedHashMap<>();
+    private final Map<String, GamePlayer> members = new LinkedHashMap<>();
     private String tag;
-    private TPlayer leader;
+    private GamePlayer leader;
     private Color color;
     private int heartHealth;
     private int souls;
 
-    public TTeam(@NotNull TPlayer leader, @NotNull String tag, @NotNull Color color) {
+    public GameTeam(@NotNull GamePlayer leader, @NotNull String tag, @NotNull Color color) {
         this.leader = leader;
         this.tag = tag;
         this.color = color;
@@ -36,16 +36,16 @@ public class TTeam {
      *
      * @return Collection of all team members.
      */
-    public @NotNull @Unmodifiable Collection<TPlayer> getMembers() {
+    public @NotNull @Unmodifiable Collection<GamePlayer> getMembers() {
         return Collections.unmodifiableCollection(members.values());
     }
 
     /**
      * Adds a player to the team and updates their status to a team member.
      *
-     * @param player The {@link TPlayer} to be added to the team.
+     * @param player The {@link GamePlayer} to be added to the team.
      */
-    public void addMember(@NotNull TPlayer player) {
+    public void addMember(@NotNull GamePlayer player) {
         members.put(player.getName(), player);
         player.setTeam(this);
         player.getBukkitPlayer().ifPresent(Disguises::refresh);
@@ -56,19 +56,19 @@ public class TTeam {
     /**
      * Checks if a player is a member of the team.
      *
-     * @param player The {@link TPlayer} to check.
+     * @param player The {@link GamePlayer} to check.
      * @return true if the player is a member of the team, false otherwise.
      */
-    public boolean hasMember(@NotNull TPlayer player) {
+    public boolean hasMember(@NotNull GamePlayer player) {
         return members.containsKey(player.getName());
     }
 
     /**
      * Removes a player from the team and updates their status to spectator.
      *
-     * @param player The {@link TPlayer} to remove from the team.
+     * @param player The {@link GamePlayer} to remove from the team.
      */
-    public void removeMember(@NotNull TPlayer player) {
+    public void removeMember(@NotNull GamePlayer player) {
         members.remove(player.getName());
         player.setTeam(null);
         player.getBukkitPlayer().ifPresent(Disguises::refresh);
@@ -81,7 +81,7 @@ public class TTeam {
      *
      * @return The leader of the team.
      */
-    public @NotNull TPlayer getLeader() {
+    public @NotNull GamePlayer getLeader() {
         return leader;
     }
 
@@ -273,8 +273,8 @@ public class TTeam {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        TTeam tTeam = (TTeam) o;
-        return Objects.equals(members, tTeam.members) && Objects.equals(leader, tTeam.leader) && Objects.equals(tag, tTeam.tag) && color == tTeam.color;
+        GameTeam gameTeam = (GameTeam) o;
+        return Objects.equals(members, gameTeam.members) && Objects.equals(leader, gameTeam.leader) && Objects.equals(tag, gameTeam.tag) && color == gameTeam.color;
     }
 
     @Override

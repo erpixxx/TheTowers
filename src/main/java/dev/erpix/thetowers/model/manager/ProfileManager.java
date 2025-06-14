@@ -1,10 +1,10 @@
-package dev.erpix.thetowers.model;
+package dev.erpix.thetowers.model.manager;
 
 import com.google.gson.Gson;
 import dev.erpix.thetowers.TheTowers;
+import dev.erpix.thetowers.model.TTPlayerProfile;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -21,7 +21,7 @@ public class ProfileManager {
     private static final ComponentLogger logger = TheTowers.getInstance().getLogger();
 
     private final Path profilesDir = TheTowers.getInstance().getPlugin().getDataPath().resolve("profiles");
-    private final Map<String, TPlayerProfile> profiles = new HashMap<>();
+    private final Map<String, TTPlayerProfile> profiles = new HashMap<>();
     private final Gson gson = new Gson();
 
     /**
@@ -49,7 +49,7 @@ public class ProfileManager {
      */
     public void load(@NotNull String playerName) {
         try (FileReader reader = new FileReader(jsonFile(playerName))) {
-            TPlayerProfile profile = gson.fromJson(reader, TPlayerProfile.class);
+            TTPlayerProfile profile = gson.fromJson(reader, TTPlayerProfile.class);
 
             if (profile == null || profile.getName().isEmpty()) {
                 profile = createProfile(playerName);
@@ -72,7 +72,7 @@ public class ProfileManager {
      */
     public void save(@NotNull String playerName) {
         try (FileWriter writer = new FileWriter(jsonFile(playerName))) {
-            TPlayerProfile profile = profiles.get(playerName);
+            TTPlayerProfile profile = profiles.get(playerName);
 
             if (profile == null) {
                 logger.warn("Cannot save profile for '{}', profile not found", playerName);
@@ -89,7 +89,7 @@ public class ProfileManager {
      * Saves all player profiles to their respective JSON files.
      */
     public void saveAll() {
-        for (TPlayerProfile profile : profiles.values()) {
+        for (TTPlayerProfile profile : profiles.values()) {
             save(profile.getName());
         }
         logger.info("All player profiles saved successfully.");
@@ -100,9 +100,9 @@ public class ProfileManager {
      * Retrieves a player's profile from memory.
      *
      * @param name the name of the player whose profile is to be retrieved.
-     * @return the {@link TPlayerProfile}, or null if not found.
+     * @return the {@link TTPlayerProfile}, or null if not found.
      */
-    public @NotNull Optional<TPlayerProfile> getProfile(@NotNull String name) {
+    public @NotNull Optional<TTPlayerProfile> getProfile(@NotNull String name) {
         return Optional.ofNullable(this.profiles.get(name));
     }
 
@@ -110,10 +110,10 @@ public class ProfileManager {
      * Creates a new profile for a player and stores it in memory.
      *
      * @param name the name of the player for whom the profile is to be created.
-     * @return the newly created {@link TPlayerProfile}.
+     * @return the newly created {@link TTPlayerProfile}.
      */
-    private @NotNull TPlayerProfile createProfile(@NotNull String name) {
-        TPlayerProfile profile = new TPlayerProfile(name);
+    private @NotNull TTPlayerProfile createProfile(@NotNull String name) {
+        TTPlayerProfile profile = new TTPlayerProfile(name);
         this.profiles.put(name, profile);
 
         logger.info("Created new profile for player '{}'", name);

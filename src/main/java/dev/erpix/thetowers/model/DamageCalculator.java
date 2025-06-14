@@ -1,6 +1,10 @@
 package dev.erpix.thetowers.model;
 
 import dev.erpix.thetowers.TheTowers;
+import dev.erpix.thetowers.model.game.GamePlayer;
+import dev.erpix.thetowers.model.game.GameSession;
+import dev.erpix.thetowers.model.game.GameTeam;
+import dev.erpix.thetowers.model.manager.PlayerManager;
 import dev.erpix.thetowers.util.Disguises;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import org.bukkit.*;
@@ -46,13 +50,13 @@ public final class DamageCalculator {
         double newHealth = currentHealth - damage;
 
         TheTowers theTowers = TheTowers.getInstance();
-        TGame game = theTowers.getGame();
-        TPlayerManager playerManager = theTowers.getPlayerManager();
+        GameSession game = theTowers.getGame();
+        PlayerManager playerManager = theTowers.getPlayerManager();
 
         // Get attacker and target TPlayer instances
-        Optional<TPlayer> attackerTPlayer = playerManager.getPlayer(
+        Optional<GamePlayer> attackerTPlayer = playerManager.getPlayer(
                 attacker instanceof Player p ? p.getName() : "");
-        Optional<TPlayer> targetTPlayer = playerManager.getPlayer(
+        Optional<GamePlayer> targetTPlayer = playerManager.getPlayer(
                 target instanceof Player p ? p.getName() : "");
 
         if (attackerTPlayer.isPresent() && targetTPlayer.isPresent()) {
@@ -62,7 +66,7 @@ public final class DamageCalculator {
         // Check if the target is below the minimum Y
         if (target.getLocation().getY() <= -127) {
             if (target instanceof Player targetPlayer && targetTPlayer.isPresent()) {
-                TTeam team = targetTPlayer.get().getTeam();
+                GameTeam team = targetTPlayer.get().getTeam();
                 Location spawn = game.getMap().getTeamSpawnLocation(team.getColor());
                 targetPlayer.teleport(spawn);
                 game.death(targetTPlayer.get(), attacker);

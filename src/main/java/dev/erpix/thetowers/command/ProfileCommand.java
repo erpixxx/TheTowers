@@ -4,7 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.erpix.thetowers.TheTowers;
-import dev.erpix.thetowers.model.TPlayerProfile;
+import dev.erpix.thetowers.model.TTPlayerProfile;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.command.CommandSender;
@@ -34,7 +34,7 @@ public class ProfileCommand implements CommandBase {
     }
 
     private int profile(CommandSender sender, String playerName) {
-        Optional<TPlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
+        Optional<TTPlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
 
         if (profile.isEmpty()) {
             sender.sendRichMessage("<red>Nie można znaleźć profilu gracza");

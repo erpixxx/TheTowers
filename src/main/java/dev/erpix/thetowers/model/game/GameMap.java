@@ -1,4 +1,4 @@
-package dev.erpix.thetowers.model;
+package dev.erpix.thetowers.model.game;
 
 import org.bukkit.GameRule;
 import org.bukkit.Location;
@@ -13,21 +13,21 @@ import java.util.Map;
 /**
  * Represents a map in the game.
  */
-public class TMap {
+public class GameMap {
 
     private final String name;
     private final TeamSetup teamSetup;
     private final Location waitingRoomLocation;
-    private final Map<TTeam.Color, Location> teamSpawnLocations;
-    private final Map<TTeam.Color, Location> teamHeartLocation;
+    private final Map<GameTeam.Color, Location> teamSpawnLocations;
+    private final Map<GameTeam.Color, Location> teamHeartLocation;
     private final World world;
 
-    public TMap(@NotNull String name,
-                @NotNull TeamSetup teamSetup,
-                @NotNull Location waitingRoomLocation,
-                @NotNull Map<TTeam.Color, Location> teamSpawnLocations,
-                @NotNull Map<TTeam.Color, Location> teamHeartLocation,
-                @NotNull World world) {
+    public GameMap(@NotNull String name,
+                   @NotNull TeamSetup teamSetup,
+                   @NotNull Location waitingRoomLocation,
+                   @NotNull Map<GameTeam.Color, Location> teamSpawnLocations,
+                   @NotNull Map<GameTeam.Color, Location> teamHeartLocation,
+                   @NotNull World world) {
         this.name = name;
         this.teamSetup = teamSetup;
         this.waitingRoomLocation = waitingRoomLocation;
@@ -69,11 +69,11 @@ public class TMap {
      *
      * @return a map of team colors to their respective spawn locations
      */
-    public @NotNull @Unmodifiable Map<TTeam.Color, Location> getTeamSpawnLocations() {
+    public @NotNull @Unmodifiable Map<GameTeam.Color, Location> getTeamSpawnLocations() {
         return Collections.unmodifiableMap(teamSpawnLocations);
     }
 
-    public @Nullable Location getTeamSpawnLocation(TTeam.Color color) {
+    public @Nullable Location getTeamSpawnLocation(GameTeam.Color color) {
         return teamSpawnLocations.get(color);
     }
 
@@ -82,7 +82,7 @@ public class TMap {
      *
      * @return a map of team colors to their respective heart locations
      */
-    public @NotNull @Unmodifiable Map<TTeam.Color, Location> getTeamHeartLocations() {
+    public @NotNull @Unmodifiable Map<GameTeam.Color, Location> getTeamHeartLocations() {
         return Collections.unmodifiableMap(teamHeartLocation);
     }
 
@@ -92,7 +92,7 @@ public class TMap {
      * @param color the color of the team
      * @return the heart location for the specified team color, or null if not found
      */
-    public @Nullable Location getTeamHeartLocation(TTeam.Color color) {
+    public @Nullable Location getTeamHeartLocation(GameTeam.Color color) {
         return teamHeartLocation.get(color);
     }
 
@@ -151,6 +151,15 @@ public class TMap {
         }
 
         /**
+         * Gets the maximum number of players allowed in a team for this setup.
+         *
+         * @return the maximum number of players in a team.
+         */
+        public int getMaxPlayersInTeam() {
+            return getMaxPlayersInTeam(this);
+        }
+
+        /**
          * Gets the formatted string representation of the team setup.
          * For example, "8v8" for TWO_TEAMS, "4v4v4v4" for FOUR_TEAMS, etc.
          *
@@ -178,11 +187,16 @@ public class TMap {
         }
 
         /**
-         * Gets the maximum number of players allowed in a team based on the team setup.
+         * Static method to calculate maximum number of players allowed in a team for provided setup.
+         *
+         * @param setup the team setup to calculate for.
+         * @return the maximum number of players in a team.
+         * @see TeamSetup#getFormattedTeamSetup()
          */
         public static int getMaxPlayersInTeam(TeamSetup setup) {
-            return (int) Math.floor((double) TGame.MAX_PLAYERS / setup.getTeamCount());
+            return (int) Math.floor((double) GameSession.MAX_PLAYERS / setup.getTeamCount());
         }
+
     }
 
 }

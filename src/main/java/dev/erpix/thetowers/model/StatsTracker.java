@@ -14,11 +14,11 @@ import java.util.function.Consumer;
  *
  * @param <E> the type of Enum used as keys for the statistics.
  */
-public abstract class StatisticsStorage<E extends Enum<E>> implements Iterable<Map.Entry<E, Integer>> {
+public abstract class StatsTracker<E extends Enum<E>> implements Iterable<Map.Entry<E, Integer>> {
 
     private final Map<E, Integer> stats;
 
-    public StatisticsStorage(@NotNull Class<E> enumClass) {
+    public StatsTracker(@NotNull Class<E> enumClass) {
         this.stats = new EnumMap<>(enumClass);
     }
 

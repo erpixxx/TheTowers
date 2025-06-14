@@ -1,7 +1,11 @@
 package dev.erpix.thetowers.model.tablist;
 
 import dev.erpix.thetowers.TheTowers;
-import dev.erpix.thetowers.model.*;
+import dev.erpix.thetowers.model.game.GameMap;
+import dev.erpix.thetowers.model.game.GamePlayer;
+import dev.erpix.thetowers.model.game.GameSession;
+import dev.erpix.thetowers.model.game.GameTeam;
+import dev.erpix.thetowers.model.manager.PlayerManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
@@ -11,7 +15,6 @@ import me.neznamy.tab.api.tablist.layout.LayoutManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 
 public class TabManager {
@@ -88,16 +91,16 @@ public class TabManager {
         return lobby;
     }
 
-    private @NotNull Layout createGameLayout(@NotNull TGame game) {
+    private @NotNull Layout createGameLayout(@NotNull GameSession game) {
         LayoutManager lm = getLayoutManagerOrThrow();
         Layout layout = lm.createNewLayout("in-game");
 
-        Collection<TTeam> teams = game.getTeams();
+        Collection<GameTeam> teams = game.getTeams();
 
         return null;
     }
 
-    private void appendToLayoutBasedOnTeamSetup(@NotNull Layout layout, @NotNull TMap.TeamSetup setup) {
+    private void appendToLayoutBasedOnTeamSetup(@NotNull Layout layout, @NotNull GameMap.TeamSetup setup) {
         switch (setup) {
             case TWO_TEAMS -> {
                 
@@ -125,15 +128,15 @@ public class TabManager {
             return;
         }
 
-        TPlayerManager pm = theTowers.getPlayerManager();
-        Optional<TPlayer> tPlayer = pm.getPlayer(playerName);
+        PlayerManager pm = theTowers.getPlayerManager();
+        Optional<GamePlayer> tPlayer = pm.getPlayer(playerName);
         if (tPlayer.isEmpty()) {
             return;
         }
 
         LayoutManager lm = getLayoutManagerOrThrow();
 
-        TGame game = theTowers.getGame();
+        GameSession game = theTowers.getGame();
         switch (game.getStage()) {
             case LOBBY:
                 Layout layout = tPlayer.get().isInTeam() ? teamLobbyLayout : lobbyLayout;

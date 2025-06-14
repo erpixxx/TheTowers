@@ -1,8 +1,8 @@
 package dev.erpix.thetowers.util;
 
 import dev.erpix.thetowers.TheTowers;
-import dev.erpix.thetowers.model.TPlayer;
-import dev.erpix.thetowers.model.TTeam;
+import dev.erpix.thetowers.model.game.GamePlayer;
+import dev.erpix.thetowers.model.game.GameTeam;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.Disguise;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
@@ -85,18 +85,18 @@ public final class Disguises {
         }
 
         String name = player.getName();
-        Optional<TPlayer> optPlayer = TheTowers.getInstance().getPlayerManager().getPlayer(name);
+        Optional<GamePlayer> optPlayer = TheTowers.getInstance().getPlayerManager().getPlayer(name);
         if (optPlayer.isEmpty()) {
             return new String[] { };
         }
-        TPlayer tPlayer = optPlayer.get();
-        TTeam team = tPlayer.getTeam();
+        GamePlayer gamePlayer = optPlayer.get();
+        GameTeam team = gamePlayer.getTeam();
         if (team == null) {
-            return new String[] { tPlayer.getDisplayNameNoTag() };
+            return new String[] { gamePlayer.getDisplayNameNoTag() };
         }
 
         String line1 = String.format("<#%s>[%s]", team.getColor().getColorHex(), team.getTag());
-        String line2 = String.format("%s", tPlayer.getDisplayNameNoTag());
+        String line2 = String.format("%s", gamePlayer.getDisplayNameNoTag());
         String line3 = String.format("<red>%s <dark_red>❤", hp);
 
         return new String[] { line1, line2, line3 };

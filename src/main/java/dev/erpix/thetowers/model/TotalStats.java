@@ -1,13 +1,14 @@
 package dev.erpix.thetowers.model;
 
+import dev.erpix.thetowers.model.game.GameStats;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents aggregated statistics for a player's profile.
  */
-public class AggregatedStatistics extends StatisticsStorage<ProfileStatKey> {
+public class TotalStats extends StatsTracker<ProfileStatKey> {
 
-    public AggregatedStatistics() {
+    public TotalStats() {
         super(ProfileStatKey.class);
         for (ProfileStatKey stat : ProfileStatKey.values()) {
             setStat(stat, 0);
@@ -18,7 +19,7 @@ public class AggregatedStatistics extends StatisticsStorage<ProfileStatKey> {
      * Incorporates game statistics into the aggregated statistics.
      *
      * <p>
-     * Maps each {@link GameStatKey} from the provided {@link GameStatistics}
+     * Maps each {@link GameStatKey} from the provided {@link GameStats}
      * to a corresponding {@link ProfileStatKey} and increments the aggregated
      * statistics by the values from the game statistics.
      * </p>
@@ -26,7 +27,7 @@ public class AggregatedStatistics extends StatisticsStorage<ProfileStatKey> {
      * @param gameStats the game statistics to incorporate.
      * @throws IllegalArgumentException if a {@link GameStatKey} cannot be mapped to a {@link ProfileStatKey}.
      */
-    public void incorporateGameStats(@NotNull GameStatistics gameStats) {
+    public void incorporateGameStats(@NotNull GameStats gameStats) {
         gameStats.forEach(statEntry -> {
             ProfileStatKey profileStat = Mapper.map(statEntry.getKey());
             incrementStat(profileStat, statEntry.getValue());

@@ -1,10 +1,10 @@
 package dev.erpix.thetowers.model.tablist;
 
 import dev.erpix.thetowers.TheTowers;
-import dev.erpix.thetowers.model.TGame;
-import dev.erpix.thetowers.model.TMap;
-import dev.erpix.thetowers.model.TPlayer;
-import dev.erpix.thetowers.model.TTeam;
+import dev.erpix.thetowers.model.game.GameSession;
+import dev.erpix.thetowers.model.game.GameTeam;
+import dev.erpix.thetowers.model.game.GameMap;
+import dev.erpix.thetowers.model.game.GamePlayer;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.placeholder.Placeholder;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
@@ -31,7 +31,7 @@ public enum TServerPlaceholder {
 
     // Game placeholders
     GAME_MAP("%tt_game_map%", -1,
-            fromMap(TMap::getName)),
+            fromMap(GameMap::getName)),
     GAME_TEAM_SETUP("%tt_game_team_setup%", -1,
             fromMap(map -> map.getTeamSetup().getFormattedTeamSetup())),
     GAME_TEAMS_READY("%tt_game_teams_ready%", -1,
@@ -43,135 +43,135 @@ public enum TServerPlaceholder {
 
     // Red team placeholders
     GAME_RED_TEAM_NAME("%tt_game_red_team_name%", -1,
-            fromTeam(TTeam.Color.RED, TTeam::getDisplayName)),
+            fromTeam(GameTeam.Color.RED, GameTeam::getDisplayName)),
     GAME_RED_TEAM_MEMBER_1("%tt_game_red_team_member_1%", -1,
-            getNTeamMember(TTeam.Color.RED, 0)),
+            getNTeamMember(GameTeam.Color.RED, 0)),
     GAME_RED_TEAM_MEMBER_2("%tt_game_red_team_member_2%", -1,
-            getNTeamMember(TTeam.Color.RED, 1)),
+            getNTeamMember(GameTeam.Color.RED, 1)),
     GAME_RED_TEAM_MEMBER_3("%tt_game_red_team_member_3%", -1,
-            getNTeamMember(TTeam.Color.RED, 2)),
+            getNTeamMember(GameTeam.Color.RED, 2)),
     GAME_RED_TEAM_MEMBER_4("%tt_game_red_team_member_4%", -1,
-            getNTeamMember(TTeam.Color.RED, 3)),
+            getNTeamMember(GameTeam.Color.RED, 3)),
     GAME_RED_TEAM_MEMBER_5("%tt_game_red_team_member_5%", -1,
-            getNTeamMember(TTeam.Color.RED, 4)),
+            getNTeamMember(GameTeam.Color.RED, 4)),
     GAME_RED_TEAM_MEMBER_6("%tt_game_red_team_member_6%", -1,
-            getNTeamMember(TTeam.Color.RED, 5)),
+            getNTeamMember(GameTeam.Color.RED, 5)),
     GAME_RED_TEAM_MEMBER_7("%tt_game_red_team_member_7%", -1,
-            getNTeamMember(TTeam.Color.RED, 6)),
+            getNTeamMember(GameTeam.Color.RED, 6)),
     GAME_RED_TEAM_MEMBER_8("%tt_game_red_team_member_8%", -1,
-            getNTeamMember(TTeam.Color.RED, 7)),
+            getNTeamMember(GameTeam.Color.RED, 7)),
     GAME_RED_TEAM_HEART_HEALTH("%tt_game_red_team_heart_health%", -1,
-            fromTeam(TTeam.Color.RED, team -> String.valueOf(team.getHeartHealth()))),
+            fromTeam(GameTeam.Color.RED, team -> String.valueOf(team.getHeartHealth()))),
 
     // Blue team placeholders
     GAME_BLUE_TEAM_NAME("%tt_game_blue_team_name%", -1,
-            fromTeam(TTeam.Color.BLUE, TTeam::getDisplayName)),
+            fromTeam(GameTeam.Color.BLUE, GameTeam::getDisplayName)),
     GAME_BLUE_TEAM_MEMBER_1("%tt_game_blue_team_member_1%", -1,
-            getNTeamMember(TTeam.Color.BLUE, 0)),
+            getNTeamMember(GameTeam.Color.BLUE, 0)),
     GAME_BLUE_TEAM_MEMBER_2("%tt_game_blue_team_member_2%", -1,
-            getNTeamMember(TTeam.Color.BLUE, 1)),
+            getNTeamMember(GameTeam.Color.BLUE, 1)),
     GAME_BLUE_TEAM_MEMBER_3("%tt_game_blue_team_member_3%", -1,
-            getNTeamMember(TTeam.Color.BLUE, 2)),
+            getNTeamMember(GameTeam.Color.BLUE, 2)),
     GAME_BLUE_TEAM_MEMBER_4("%tt_game_blue_team_member_4%", -1,
-            getNTeamMember(TTeam.Color.BLUE, 3)),
+            getNTeamMember(GameTeam.Color.BLUE, 3)),
     GAME_BLUE_TEAM_MEMBER_5("%tt_game_blue_team_member_5%", -1,
-            getNTeamMember(TTeam.Color.BLUE, 4)),
+            getNTeamMember(GameTeam.Color.BLUE, 4)),
     GAME_BLUE_TEAM_MEMBER_6("%tt_game_blue_team_member_6%", -1,
-            getNTeamMember(TTeam.Color.BLUE, 5)),
+            getNTeamMember(GameTeam.Color.BLUE, 5)),
     GAME_BLUE_TEAM_MEMBER_7("%tt_game_blue_team_member_7%", -1,
-            getNTeamMember(TTeam.Color.BLUE, 6)),
+            getNTeamMember(GameTeam.Color.BLUE, 6)),
     GAME_BLUE_TEAM_MEMBER_8("%tt_game_blue_team_member_8%", -1,
-            getNTeamMember(TTeam.Color.BLUE, 7)),
+            getNTeamMember(GameTeam.Color.BLUE, 7)),
     GAME_BLUE_TEAM_HEART_HEALTH("%tt_game_blue_team_heart_health%", -1,
-            fromTeam(TTeam.Color.BLUE, team -> String.valueOf(team.getHeartHealth()))),
+            fromTeam(GameTeam.Color.BLUE, team -> String.valueOf(team.getHeartHealth()))),
 
     // Green team placeholders
     GAME_GREEN_TEAM_NAME("%tt_game_green_team_name%", -1,
-            fromTeam(TTeam.Color.GREEN, TTeam::getDisplayName)),
+            fromTeam(GameTeam.Color.GREEN, GameTeam::getDisplayName)),
     GAME_GREEN_TEAM_MEMBER_1("%tt_game_green_team_member_1%", -1,
-            getNTeamMember(TTeam.Color.GREEN, 0)),
+            getNTeamMember(GameTeam.Color.GREEN, 0)),
     GAME_GREEN_TEAM_MEMBER_2("%tt_game_green_team_member_2%", -1,
-            getNTeamMember(TTeam.Color.GREEN, 1)),
+            getNTeamMember(GameTeam.Color.GREEN, 1)),
     GAME_GREEN_TEAM_MEMBER_3("%tt_game_green_team_member_3%", -1,
-            getNTeamMember(TTeam.Color.GREEN, 2)),
+            getNTeamMember(GameTeam.Color.GREEN, 2)),
     GAME_GREEN_TEAM_MEMBER_4("%tt_game_green_team_member_4%", -1,
-            getNTeamMember(TTeam.Color.GREEN, 3)),
+            getNTeamMember(GameTeam.Color.GREEN, 3)),
     GAME_GREEN_TEAM_MEMBER_5("%tt_game_green_team_member_5%", -1,
-            getNTeamMember(TTeam.Color.GREEN, 4)),
+            getNTeamMember(GameTeam.Color.GREEN, 4)),
     GAME_GREEN_TEAM_MEMBER_6("%tt_game_green_team_member_6%", -1,
-            getNTeamMember(TTeam.Color.GREEN, 5)),
+            getNTeamMember(GameTeam.Color.GREEN, 5)),
     GAME_GREEN_TEAM_MEMBER_7("%tt_game_green_team_member_7%", -1,
-            getNTeamMember(TTeam.Color.GREEN, 6)),
+            getNTeamMember(GameTeam.Color.GREEN, 6)),
     GAME_GREEN_TEAM_MEMBER_8("%tt_game_green_team_member_8%", -1,
-            getNTeamMember(TTeam.Color.GREEN, 7)),
+            getNTeamMember(GameTeam.Color.GREEN, 7)),
     GAME_GREEN_TEAM_HEART_HEALTH("%tt_game_green_team_heart_health%", -1,
-            fromTeam(TTeam.Color.GREEN, team -> String.valueOf(team.getHeartHealth()))),
+            fromTeam(GameTeam.Color.GREEN, team -> String.valueOf(team.getHeartHealth()))),
 
     // Yellow team placeholders
     GAME_YELLOW_TEAM_NAME("%tt_game_yellow_team_name%", -1,
-            fromTeam(TTeam.Color.YELLOW, TTeam::getDisplayName)),
+            fromTeam(GameTeam.Color.YELLOW, GameTeam::getDisplayName)),
     GAME_YELLOW_TEAM_MEMBER_1("%tt_game_yellow_team_member_1%", -1,
-            getNTeamMember(TTeam.Color.YELLOW, 0)),
+            getNTeamMember(GameTeam.Color.YELLOW, 0)),
     GAME_YELLOW_TEAM_MEMBER_2("%tt_game_yellow_team_member_2%", -1,
-            getNTeamMember(TTeam.Color.YELLOW, 1)),
+            getNTeamMember(GameTeam.Color.YELLOW, 1)),
     GAME_YELLOW_TEAM_MEMBER_3("%tt_game_yellow_team_member_3%", -1,
-            getNTeamMember(TTeam.Color.YELLOW, 2)),
+            getNTeamMember(GameTeam.Color.YELLOW, 2)),
     GAME_YELLOW_TEAM_MEMBER_4("%tt_game_yellow_team_member_4%", -1,
-            getNTeamMember(TTeam.Color.YELLOW, 3)),
+            getNTeamMember(GameTeam.Color.YELLOW, 3)),
     GAME_YELLOW_TEAM_MEMBER_5("%tt_game_yellow_team_member_5%", -1,
-            getNTeamMember(TTeam.Color.YELLOW, 4)),
+            getNTeamMember(GameTeam.Color.YELLOW, 4)),
     GAME_YELLOW_TEAM_MEMBER_6("%tt_game_yellow_team_member_6%", -1,
-            getNTeamMember(TTeam.Color.YELLOW, 5)),
+            getNTeamMember(GameTeam.Color.YELLOW, 5)),
     GAME_YELLOW_TEAM_MEMBER_7("%tt_game_yellow_team_member_7%", -1,
-            getNTeamMember(TTeam.Color.YELLOW, 6)),
+            getNTeamMember(GameTeam.Color.YELLOW, 6)),
     GAME_YELLOW_TEAM_MEMBER_8("%tt_game_yellow_team_member_8%", -1,
-            getNTeamMember(TTeam.Color.YELLOW, 7)),
+            getNTeamMember(GameTeam.Color.YELLOW, 7)),
     GAME_YELLOW_TEAM_HEART_HEALTH("%tt_game_yellow_team_heart_health%", -1,
-            fromTeam(TTeam.Color.YELLOW, team -> String.valueOf(team.getHeartHealth()))),
+            fromTeam(GameTeam.Color.YELLOW, team -> String.valueOf(team.getHeartHealth()))),
 
     // Orange team placeholders
     GAME_ORANGE_TEAM_NAME("%tt_game_orange_team_name%", -1,
-            fromTeam(TTeam.Color.ORANGE, TTeam::getDisplayName)),
+            fromTeam(GameTeam.Color.ORANGE, GameTeam::getDisplayName)),
     GAME_ORANGE_TEAM_MEMBER_1("%tt_game_orange_team_member_1%", -1,
-            getNTeamMember(TTeam.Color.ORANGE, 0)),
+            getNTeamMember(GameTeam.Color.ORANGE, 0)),
     GAME_ORANGE_TEAM_MEMBER_2("%tt_game_orange_team_member_2%", -1,
-            getNTeamMember(TTeam.Color.ORANGE, 1)),
+            getNTeamMember(GameTeam.Color.ORANGE, 1)),
     GAME_ORANGE_TEAM_MEMBER_3("%tt_game_orange_team_member_3%", -1,
-            getNTeamMember(TTeam.Color.ORANGE, 2)),
+            getNTeamMember(GameTeam.Color.ORANGE, 2)),
     GAME_ORANGE_TEAM_MEMBER_4("%tt_game_orange_team_member_4%", -1,
-            getNTeamMember(TTeam.Color.ORANGE, 3)),
+            getNTeamMember(GameTeam.Color.ORANGE, 3)),
     GAME_ORANGE_TEAM_MEMBER_5("%tt_game_orange_team_member_5%", -1,
-            getNTeamMember(TTeam.Color.ORANGE, 4)),
+            getNTeamMember(GameTeam.Color.ORANGE, 4)),
     GAME_ORANGE_TEAM_MEMBER_6("%tt_game_orange_team_member_6%", -1,
-            getNTeamMember(TTeam.Color.ORANGE, 5)),
+            getNTeamMember(GameTeam.Color.ORANGE, 5)),
     GAME_ORANGE_TEAM_MEMBER_7("%tt_game_orange_team_member_7%", -1,
-            getNTeamMember(TTeam.Color.ORANGE, 6)),
+            getNTeamMember(GameTeam.Color.ORANGE, 6)),
     GAME_ORANGE_TEAM_MEMBER_8("%tt_game_orange_team_member_8%", -1,
-            getNTeamMember(TTeam.Color.ORANGE, 7)),
+            getNTeamMember(GameTeam.Color.ORANGE, 7)),
     GAME_ORANGE_TEAM_HEART_HEALTH("%tt_game_orange_team_heart_health%", -1,
-            fromTeam(TTeam.Color.ORANGE, team -> String.valueOf(team.getHeartHealth()))),
+            fromTeam(GameTeam.Color.ORANGE, team -> String.valueOf(team.getHeartHealth()))),
 
     // Purple team placeholders
     GAME_PURPLE_TEAM_NAME("%tt_game_purple_team_name%", -1,
-            fromTeam(TTeam.Color.PURPLE, TTeam::getDisplayName)),
+            fromTeam(GameTeam.Color.PURPLE, GameTeam::getDisplayName)),
     GAME_PURPLE_TEAM_MEMBER_1("%tt_game_purple_team_member_1%", -1,
-            getNTeamMember(TTeam.Color.PURPLE, 0)),
+            getNTeamMember(GameTeam.Color.PURPLE, 0)),
     GAME_PURPLE_TEAM_MEMBER_2("%tt_game_purple_team_member_2%", -1,
-            getNTeamMember(TTeam.Color.PURPLE, 1)),
+            getNTeamMember(GameTeam.Color.PURPLE, 1)),
     GAME_PURPLE_TEAM_MEMBER_3("%tt_game_purple_team_member_3%", -1,
-            getNTeamMember(TTeam.Color.PURPLE, 2)),
+            getNTeamMember(GameTeam.Color.PURPLE, 2)),
     GAME_PURPLE_TEAM_MEMBER_4("%tt_game_purple_team_member_4%", -1,
-            getNTeamMember(TTeam.Color.PURPLE, 3)),
+            getNTeamMember(GameTeam.Color.PURPLE, 3)),
     GAME_PURPLE_TEAM_MEMBER_5("%tt_game_purple_team_member_5%", -1,
-            getNTeamMember(TTeam.Color.PURPLE, 4)),
+            getNTeamMember(GameTeam.Color.PURPLE, 4)),
     GAME_PURPLE_TEAM_MEMBER_6("%tt_game_purple_team_member_6%", -1,
-            getNTeamMember(TTeam.Color.PURPLE, 5)),
+            getNTeamMember(GameTeam.Color.PURPLE, 5)),
     GAME_PURPLE_TEAM_MEMBER_7("%tt_game_purple_team_member_7%", -1,
-            getNTeamMember(TTeam.Color.PURPLE, 6)),
+            getNTeamMember(GameTeam.Color.PURPLE, 6)),
     GAME_PURPLE_TEAM_MEMBER_8("%tt_game_purple_team_member_8%", -1,
-            getNTeamMember(TTeam.Color.PURPLE, 7)),
+            getNTeamMember(GameTeam.Color.PURPLE, 7)),
     GAME_PURPLE_TEAM_HEART_HEALTH("%tt_game_purple_team_heart_health%", -1,
-            fromTeam(TTeam.Color.PURPLE, team -> String.valueOf(team.getHeartHealth())));
+            fromTeam(GameTeam.Color.PURPLE, team -> String.valueOf(team.getHeartHealth())));
 
     private static final TabAPI TAB = TabAPI.getInstance();
     private final String placeholder;
@@ -242,20 +242,20 @@ public enum TServerPlaceholder {
         return null;
     }
 
-    public static @NotNull TeamPlaceholders getTeamPlaceholders(@NotNull TTeam.Color color) {
+    public static @NotNull TeamPlaceholders getTeamPlaceholders(@NotNull GameTeam.Color color) {
         return TeamPlaceholders.forColor(color);
     }
 
     public static class TeamPlaceholders {
 
-        private static final Map<TTeam.Color, TeamPlaceholders> COLORS = new EnumMap<>(TTeam.Color.class);
+        private static final Map<GameTeam.Color, TeamPlaceholders> COLORS = new EnumMap<>(GameTeam.Color.class);
 
-        private final TTeam.Color color;
+        private final GameTeam.Color color;
         private final TServerPlaceholder namePlaceholder;
         private final TServerPlaceholder heartHealthPlaceholder;
         private final TServerPlaceholder[] memberPlaceholders;
 
-        private TeamPlaceholders(TTeam.Color color) {
+        private TeamPlaceholders(GameTeam.Color color) {
             this.color = color;
             switch (color) {
                 case RED -> {
@@ -322,7 +322,7 @@ public enum TServerPlaceholder {
             }
         }
 
-        public @NotNull TTeam.Color getColor() {
+        public @NotNull GameTeam.Color getColor() {
             return color;
         }
 
@@ -353,7 +353,7 @@ public enum TServerPlaceholder {
             return all;
         }
 
-        public static @NotNull TeamPlaceholders forColor(@NotNull TTeam.Color color) {
+        public static @NotNull TeamPlaceholders forColor(@NotNull GameTeam.Color color) {
             return COLORS.computeIfAbsent(color, TeamPlaceholders::new);
         }
     }
@@ -362,32 +362,32 @@ public enum TServerPlaceholder {
     // Helper methods for creating suppliers
     //
 
-    private static @NotNull Supplier<String> fromGame(@NotNull Function<TGame, String> fn) {
+    private static @NotNull Supplier<String> fromGame(@NotNull Function<GameSession, String> fn) {
         return () -> fn.apply(TheTowers.getInstance().getGame());
     }
 
-    private static @NotNull Supplier<String> fromMap(@NotNull Function<TMap, String> fn) {
+    private static @NotNull Supplier<String> fromMap(@NotNull Function<GameMap, String> fn) {
         return () -> fn.apply(TheTowers.getInstance().getGame().getMap());
     }
 
-    private static @NotNull Supplier<String> fromTeam(@NotNull TTeam.Color color, @NotNull Function<TTeam, String> fn) {
+    private static @NotNull Supplier<String> fromTeam(@NotNull GameTeam.Color color, @NotNull Function<GameTeam, String> fn) {
         return () -> {
-            TTeam team = TheTowers.getInstance().getGame().getTeam(color);
+            GameTeam team = TheTowers.getInstance().getGame().getTeam(color);
             return team != null ? fn.apply(team) : "";
         };
     }
 
-    private static @NotNull Supplier<String> getNTeamMember(@NotNull TTeam.Color color, int n) {
+    private static @NotNull Supplier<String> getNTeamMember(@NotNull GameTeam.Color color, int n) {
         return () -> {
-            TGame game = TheTowers.getInstance().getGame();
-            TTeam team = game.getTeam(color);
+            GameSession game = TheTowers.getInstance().getGame();
+            GameTeam team = game.getTeam(color);
             if (team == null || team.getMembers().size() < n) {
                 return "";
             }
             return team.getMembers().stream()
                     .skip(n)
                     .findFirst()
-                    .map(TPlayer::getDisplayName)
+                    .map(GamePlayer::getDisplayName)
                     .orElse("");
         };
     }

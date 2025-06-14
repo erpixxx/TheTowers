@@ -1,5 +1,8 @@
-package dev.erpix.thetowers.model;
+package dev.erpix.thetowers.model.game;
 
+import dev.erpix.thetowers.model.GameStatKey;
+import dev.erpix.thetowers.model.StatsTracker;
+import dev.erpix.thetowers.util.OrderedAttackerCache;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -13,15 +16,15 @@ import java.util.function.Consumer;
 /**
  * Represents a player in the game.
  */
-public class TPlayer {
+public class GamePlayer {
 
     private final String name;
     private final OrderedAttackerCache attackers = new OrderedAttackerCache(10);
-    private final GameStatistics stats = new GameStatistics();
-    private TTeam team;
+    private final GameStats stats = new GameStats();
+    private GameTeam team;
     private boolean isAlive = true;
 
-    public TPlayer(@NotNull String name) {
+    public GamePlayer(@NotNull String name) {
         this.name = name;
     }
 
@@ -41,9 +44,9 @@ public class TPlayer {
      * @return true if the attacker is online and the action was executed, false otherwise.
      */
     public boolean doAsBukkitPlayer(@NotNull Consumer<Player> action) {
-        Optional<Player> playerOpt = getBukkitPlayer();
-        playerOpt.ifPresent(action);
-        return playerOpt.isPresent();
+        Optional<Player> player = getBukkitPlayer();
+        player.ifPresent(action);
+        return player.isPresent();
     }
 
     /**
@@ -118,7 +121,7 @@ public class TPlayer {
      * @param player The attacker who dealt the damage.
      * @param damage The amount of damage dealt by the attacker.
      */
-    public void addAttacker(@NotNull TPlayer player, double damage) {
+    public void addAttacker(@NotNull GamePlayer player, double damage) {
         attackers.put(player, damage);
     }
 
@@ -127,7 +130,7 @@ public class TPlayer {
      *
      * @return The stats container containing various in-game statistics for the player.
      */
-    public @NotNull StatisticsStorage<GameStatKey> getStats() {
+    public @NotNull StatsTracker<GameStatKey> getStats() {
         return stats;
     }
 
@@ -136,7 +139,7 @@ public class TPlayer {
      *
      * @return The team of the player, or null if not on a team.
      */
-    public @Nullable TTeam getTeam() {
+    public @Nullable GameTeam getTeam() {
         return team;
     }
 
@@ -154,7 +157,7 @@ public class TPlayer {
      *
      * @param team The team to set for the player.
      */
-    public void setTeam(@Nullable TTeam team) {
+    public void setTeam(@Nullable GameTeam team) {
         this.team = team;
     }
 
@@ -201,8 +204,8 @@ public class TPlayer {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        TPlayer tPlayer = (TPlayer) o;
-        return Objects.equals(name, tPlayer.name);
+        GamePlayer gamePlayer = (GamePlayer) o;
+        return Objects.equals(name, gamePlayer.name);
     }
 
     @Override

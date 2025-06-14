@@ -1,7 +1,9 @@
-package dev.erpix.thetowers.model;
+package dev.erpix.thetowers.model.game;
 
 import dev.erpix.thetowers.TheTowers;
+import dev.erpix.thetowers.model.GameStatKey;
 import dev.erpix.thetowers.util.Components;
+import dev.erpix.thetowers.util.OrderedAttackerCache;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.title.Title;
@@ -21,27 +23,27 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Represents a game in The Towers.
  */
-public class TGame {
+public class GameSession {
 
     public static final int MAX_PLAYERS = 32;
 
-    private final Map<String, TTeam> teams = new LinkedHashMap<>();
-    private final Map<String, TPlayer> spectators = new HashMap<>();
-    private TMap map;
+    private final Map<String, GameTeam> teams = new LinkedHashMap<>();
+    private final Map<String, GamePlayer> spectators = new HashMap<>();
+    private GameMap map;
     private int maxPlayersPerTeam;
     private Stage stage;
     private LocalDateTime startTime;
 
-    public TGame() {
+    public GameSession() {
         this.stage = Stage.LOBBY;
     }
 
     /**
      * Retrieves the current chosen map in the game.
      *
-     * @return the current {@link TMap} object representing the game's map.
+     * @return the current {@link GameMap} object representing the game's map.
      */
-    public @NotNull TMap getMap() {
+    public @NotNull GameMap getMap() {
         return map;
     }
 
@@ -49,13 +51,13 @@ public class TGame {
      * Sets the map for the game and updates the maximum players per team based on the map's team setup.
      * Removes any teams that exceed the maximum allowed players per team.
      *
-     * @param map the {@link TMap} object representing the new map for the game.
+     * @param map the {@link GameMap} object representing the new map for the game.
      */
-    public void setMap(@NotNull TMap map) {
+    public void setMap(@NotNull GameMap map) {
         this.map = map;
-        this.maxPlayersPerTeam = TMap.TeamSetup.getMaxPlayersInTeam(map.getTeamSetup());
-        for (TTeam team : teams.values()) {
-            Collection<TPlayer> members = team.getMembers();
+        this.maxPlayersPerTeam = GameMap.TeamSetup.getMaxPlayersInTeam(map.getTeamSetup());
+        for (GameTeam team : teams.values()) {
+            Collection<GamePlayer> members = team.getMembers();
             if (members.size() > maxPlayersPerTeam) {
                 removeTeam(team);
             }
@@ -84,9 +86,9 @@ public class TGame {
     /**
      * Adds a team to the game.
      *
-     * @param team the {@link TTeam} object representing the team to add.
+     * @param team the {@link GameTeam} object representing the team to add.
      */
-    public void addTeam(@NotNull TTeam team) {
+    public void addTeam(@NotNull GameTeam team) {
         teams.put(team.getTag(), team);
     }
 
@@ -101,9 +103,9 @@ public class TGame {
      * Retrieves a team by its tag.
      *
      * @param tag the unique identifier of the team.
-     * @return the {@link TTeam} object representing the team, or null if no team with the given tag exists.
+     * @return the {@link GameTeam} object representing the team, or null if no team with the given tag exists.
      */
-    public @Nullable TTeam getTeam(@NotNull String tag) {
+    public @Nullable GameTeam getTeam(@NotNull String tag) {
         return teams.get(tag);
     }
 
@@ -111,9 +113,9 @@ public class TGame {
      * Retrieves a team by its color.
      *
      * @param color the color of the team to retrieve.
-     * @return the {@link TTeam} object representing the team with the specified color, or null if no such team exists.
+     * @return the {@link GameTeam} object representing the team with the specified color, or null if no such team exists.
      */
-    public @Nullable TTeam getTeam(@NotNull TTeam.Color color) {
+    public @Nullable GameTeam getTeam(@NotNull GameTeam.Color color) {
         return teams.values().stream()
                 .filter(team -> team.getColor() == color)
                 .findFirst()
@@ -125,18 +127,18 @@ public class TGame {
      *
      * @return a collection of teams in the game.
      */
-    public @NotNull @Unmodifiable Collection<TTeam> getTeams() {
+    public @NotNull @Unmodifiable Collection<GameTeam> getTeams() {
         return Collections.unmodifiableCollection(teams.values());
     }
 
     /**
      * Removes a team from the game and converts its members to spectators.
      *
-     * @param team the {@link TTeam} to remove.
+     * @param team the {@link GameTeam} to remove.
      */
-    public void removeTeam(@NotNull TTeam team) {
+    public void removeTeam(@NotNull GameTeam team) {
         teams.remove(team.getTag());
-        Collection<TPlayer> members = team.getMembers();
+        Collection<GamePlayer> members = team.getMembers();
         members.forEach(member -> {
             member.sendMessage("<gray>Twoja drużyna została usunięta.");
             member.setTeam(null);
@@ -147,9 +149,9 @@ public class TGame {
     /**
      * Adds a player to the spectators list.
      *
-     * @param player the {@link TPlayer} to add as a spectator.
+     * @param player the {@link GamePlayer} to add as a spectator.
      */
-    public void addSpectator(@NotNull TPlayer player) {
+    public void addSpectator(@NotNull GamePlayer player) {
         spectators.put(player.getName(), player);
         player.setAlive(false);
     }
@@ -157,9 +159,9 @@ public class TGame {
     /**
      * Removes a player from the spectators list.
      *
-     * @param player the {@link TPlayer} to remove from the spectators list.
+     * @param player the {@link GamePlayer} to remove from the spectators list.
      */
-    public void removeSpectator(@NotNull TPlayer player) {
+    public void removeSpectator(@NotNull GamePlayer player) {
         spectators.remove(player.getName());
         player.setAlive(true);
     }
@@ -169,7 +171,7 @@ public class TGame {
      *
      * @return a collection of all spectators in the game.
      */
-    public @NotNull @Unmodifiable Collection<TPlayer> getSpectators() {
+    public @NotNull @Unmodifiable Collection<GamePlayer> getSpectators() {
         return spectators.values();
     }
 
@@ -228,10 +230,10 @@ public class TGame {
     /**
      * Handles the death of a player in the game.
      *
-     * @param victim   the {@link TPlayer} who died.
+     * @param victim   the {@link GamePlayer} who died.
      * @param attacker the {@link Entity} responsible for the death.
      */
-    public void death(@NotNull TPlayer victim, @NotNull Entity attacker) {
+    public void death(@NotNull GamePlayer victim, @NotNull Entity attacker) {
         Optional<Player> playerOpt = victim.getBukkitPlayer();
         if (playerOpt.isEmpty()) return;
         Player victimPlayer = playerOpt.get();
@@ -266,11 +268,11 @@ public class TGame {
      *
      * <p>Responsible for updating the victim's and attacker's stats.</p>
      *
-     * @param victim         the {@link TPlayer} who died.
+     * @param victim         the {@link GamePlayer} who died.
      * @param victimPlayer   the bukkit {@link Player} of the victim.
      * @param attackerPlayer the bukkit {@link Player} of the attacker.
      */
-    private void handlePlayerAttacker(@NotNull TPlayer victim, @NotNull Player victimPlayer, @NotNull Player attackerPlayer) {
+    private void handlePlayerAttacker(@NotNull GamePlayer victim, @NotNull Player victimPlayer, @NotNull Player attackerPlayer) {
         TheTowers.getInstance().getPlayerManager().getPlayer(attackerPlayer.getName()).ifPresent(attackerTPlayer -> {
             victim.getAttackers().forEach(atk -> {
                 if (!atk.attacker().equals(attackerTPlayer)) {
@@ -288,10 +290,10 @@ public class TGame {
     /**
      * Handles the death caused by a non-player entity.
      *
-     * @param victim   the {@link TPlayer} who died.
+     * @param victim   the {@link GamePlayer} who died.
      * @param attacker the {@link Entity} responsible for the death, or null if unknown.
      */
-    private void handleNonPlayerAttacker(@NotNull TPlayer victim, @Nullable Entity attacker) {
+    private void handleNonPlayerAttacker(@NotNull GamePlayer victim, @Nullable Entity attacker) {
         Component attackerName = attacker != null ? attacker.customName() : null;
         if (attackerName != null) {
             broadcastDeathMessage(victim, PlainTextComponentSerializer.plainText().serialize(attackerName));
@@ -309,10 +311,10 @@ public class TGame {
     /**
      * Broadcasts a death message to all online players.
      *
-     * @param victim       the {@link TPlayer} who died.
+     * @param victim       the {@link GamePlayer} who died.
      * @param attackerName the name of the attacker, or null if no attacker is available.
      */
-    private void broadcastDeathMessage(@NotNull TPlayer victim, @Nullable String attackerName) {
+    private void broadcastDeathMessage(@NotNull GamePlayer victim, @Nullable String attackerName) {
         String message = attackerName == null
                 ? String.format("<gray>☠ <dark_gray>» <red>%s umarł", victim.getDisplayName())
                 : String.format("<gray>☠ <dark_gray>» <red>%s został zabity przez %s",
@@ -328,8 +330,8 @@ public class TGame {
      * @param player the {@link Player} to respawn
      */
     private void respawn(@NotNull Player player) {
-        TPlayer tPlayer = getPlayer(player.getName());
-        if (tPlayer == null) return;
+        GamePlayer gamePlayer = getPlayer(player.getName());
+        if (gamePlayer == null) return;
 
         // Start the respawn countdown
         AtomicInteger i = new AtomicInteger(0);
@@ -348,10 +350,10 @@ public class TGame {
             }
             else {
                 Bukkit.getScheduler().runTask(TheTowers.getInstance().getPlugin(), () -> {
-                    tPlayer.setAlive(true);
+                    gamePlayer.setAlive(true);
                     player.heal(20);
                     player.setGameMode(GameMode.ADVENTURE);
-                    player.teleport(map.getTeamSpawnLocations().get(tPlayer.getTeam().getColor()));
+                    player.teleport(map.getTeamSpawnLocations().get(gamePlayer.getTeam().getColor()));
                     player.sendMessage(Components.color("<green>Odrodziłeś się!"));
                     player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 0.5f);
                 });
@@ -364,9 +366,9 @@ public class TGame {
      * Retrieves a player by their name.
      *
      * @param name the name of the player to retrieve.
-     * @return the {@link TPlayer} object if found, or null if no player with the given name exists.
+     * @return the {@link GamePlayer} object if found, or null if no player with the given name exists.
      */
-    public @Nullable TPlayer getPlayer(@NotNull String name) {
+    public @Nullable GamePlayer getPlayer(@NotNull String name) {
         return teams.values().stream()
                 .flatMap(team -> team.getMembers().stream())
                 .filter(player -> player.getName().equals(name))
@@ -377,10 +379,10 @@ public class TGame {
     /**
      * Checks if a player is part of any team in the game.
      *
-     * @param player the {@link TPlayer} to check.
+     * @param player the {@link GamePlayer} to check.
      * @return true if the player is in a team, false otherwise.
      */
-    public boolean isPlayerInGame(@NotNull TPlayer player) {
+    public boolean isPlayerInGame(@NotNull GamePlayer player) {
         return teams.values().stream()
                 .anyMatch(team -> team.hasMember(player));
     }

@@ -1,5 +1,6 @@
-package dev.erpix.thetowers.model;
+package dev.erpix.thetowers.model.manager;
 
+import dev.erpix.thetowers.model.game.GamePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -11,19 +12,19 @@ import java.util.*;
  *
  * <p>This class provides a central registry for all players currently active in the game.</p>
  */
-public class TPlayerManager {
+public class PlayerManager {
 
-    private final Map<String, TPlayer> players = new HashMap<>();
+    private final Map<String, GamePlayer> players = new HashMap<>();
 
     // TODO
-    public @NotNull TPlayer addPlayer(@NotNull Player player) {
+    public @NotNull GamePlayer addPlayer(@NotNull Player player) {
         String playerName = player.getName();
         if (players.containsKey(playerName)) {
             return players.get(playerName);
         }
-        TPlayer tPlayer = new TPlayer(playerName);
-        players.put(playerName, tPlayer);
-        return tPlayer;
+        GamePlayer gamePlayer = new GamePlayer(playerName);
+        players.put(playerName, gamePlayer);
+        return gamePlayer;
     }
 
     /**
@@ -32,7 +33,7 @@ public class TPlayerManager {
      * @param name the name of the player to retrieve.
      * @return an {@link Optional} containing the player if found, or empty if not.
      */
-    public @NotNull Optional<TPlayer> getPlayer(@NotNull String name) {
+    public @NotNull Optional<GamePlayer> getPlayer(@NotNull String name) {
         return Optional.ofNullable(players.get(name));
     }
 
@@ -60,7 +61,7 @@ public class TPlayerManager {
      *
      * @return a collection of all active players.
      */
-    public @NotNull @Unmodifiable Collection<TPlayer> getPlayers() {
+    public @NotNull @Unmodifiable Collection<GamePlayer> getPlayers() {
         return Collections.unmodifiableCollection(players.values());
     }
 

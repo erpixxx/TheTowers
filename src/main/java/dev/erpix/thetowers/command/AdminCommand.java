@@ -4,10 +4,12 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.erpix.thetowers.TheTowers;
 import dev.erpix.thetowers.model.*;
+import dev.erpix.thetowers.model.game.GamePlayer;
+import dev.erpix.thetowers.model.game.GameSession;
+import dev.erpix.thetowers.model.game.GameTeam;
 import dev.erpix.thetowers.util.Colors;
 import dev.erpix.thetowers.util.Items;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -19,7 +21,6 @@ import org.bukkit.entity.Player;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /*
  *
@@ -83,8 +84,8 @@ public class AdminCommand implements CommandBase {
                                             String tag = ctx.getArgument("tag", String.class);
 
                                             TheTowers towers = TheTowers.getInstance();
-                                            TGame game = towers.getGame();
-                                            TTeam team = game.getTeam(tag);
+                                            GameSession game = towers.getGame();
+                                            GameTeam team = game.getTeam(tag);
 
                                             if (team == null) {
                                                 sender.sendRichMessage("<red>Team with tag '" + tag + "' does not exist.");
@@ -101,7 +102,7 @@ public class AdminCommand implements CommandBase {
                                         .then(Commands.literal("color")
                                                 .then(Commands.argument("color", StringArgumentType.word())
                                                         .suggests((ctx, builder) -> {
-                                                            for (TTeam.Color color : TTeam.Color.values()) {
+                                                            for (GameTeam.Color color : GameTeam.Color.values()) {
                                                                 builder.suggest(color.getName());
                                                             }
                                                             return builder.buildFuture();
@@ -111,7 +112,7 @@ public class AdminCommand implements CommandBase {
 
                                                             String tag = ctx.getArgument("tag", String.class);
                                                             String colorName = ctx.getArgument("color", String.class);
-                                                            TTeam.Color color = TTeam.Color.from(colorName.toLowerCase());
+                                                            GameTeam.Color color = GameTeam.Color.from(colorName.toLowerCase());
 
                                                             if (color == null) {
                                                                 sender.sendRichMessage("<red>Invalid color: " + colorName);
@@ -119,9 +120,9 @@ public class AdminCommand implements CommandBase {
                                                             }
 
                                                             TheTowers towers = TheTowers.getInstance();
-                                                            TGame game = towers.getGame();
+                                                            GameSession game = towers.getGame();
 
-                                                            Optional<TTeam> sameColor = game.getTeams().stream()
+                                                            Optional<GameTeam> sameColor = game.getTeams().stream()
                                                                     .filter(team -> team.getColor() == color)
                                                                     .findFirst();
                                                             if (sameColor.isPresent()) {
@@ -129,7 +130,7 @@ public class AdminCommand implements CommandBase {
                                                                 return Command.SINGLE_SUCCESS;
                                                             }
 
-                                                            TTeam team = game.getTeam(tag);
+                                                            GameTeam team = game.getTeam(tag);
 
                                                             if (team == null) {
                                                                 sender.sendRichMessage("<red>Team with tag '" + tag + "' does not exist.");
@@ -152,8 +153,8 @@ public class AdminCommand implements CommandBase {
                                                             int souls = ctx.getArgument("number", Integer.class);
 
                                                             TheTowers towers = TheTowers.getInstance();
-                                                            TGame game = towers.getGame();
-                                                            TTeam team = game.getTeam(tag);
+                                                            GameSession game = towers.getGame();
+                                                            GameTeam team = game.getTeam(tag);
 
                                                             if (team == null) {
                                                                 sender.sendRichMessage("<red>Team with tag '" + tag + "' does not exist.");
@@ -175,8 +176,8 @@ public class AdminCommand implements CommandBase {
                                             String tag = ctx.getArgument("tag", String.class);
 
                                             TheTowers towers = TheTowers.getInstance();
-                                            TGame game = towers.getGame();
-                                            TTeam team = game.getTeam(tag);
+                                            GameSession game = towers.getGame();
+                                            GameTeam team = game.getTeam(tag);
 
                                             if (team == null) {
                                                 sender.sendRichMessage("<red>Team with tag '" + tag + "' does not exist.");
@@ -188,7 +189,7 @@ public class AdminCommand implements CommandBase {
                                             sender.sendRichMessage("<gray>Color: <white>" + team.getColor());
                                             sender.sendRichMessage("<gray>Leader: <white>" + team.getLeader().getName());
                                             sender.sendRichMessage("<gray>Members: <white>" + team.getMembers().size());
-                                            for (TPlayer member : team.getMembers()) {
+                                            for (GamePlayer member : team.getMembers()) {
                                                 sender.sendRichMessage("<gray> - <white>" + member.getName());
                                             }
                                             sender.sendRichMessage("<gray>Is Alive: <white>" + (team.isAlive() ? "Yes" : "No"));
@@ -257,7 +258,7 @@ public class AdminCommand implements CommandBase {
     }
 
     private int profile(CommandSender sender, String playerName) {
-        Optional<TPlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
+        Optional<TTPlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
         if (profile.isEmpty()) {
             sender.sendRichMessage("<red>Nie można znaleźć profilu dla gracza " + playerName);
             return 0;
@@ -274,7 +275,7 @@ public class AdminCommand implements CommandBase {
     }
 
     private int profileStatAdd(CommandSender sender, String playerName, String statKey, int value) {
-        Optional<TPlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
+        Optional<TTPlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
         if (profile.isEmpty()) {
             sender.sendRichMessage("<red>Nie można znaleźć profilu dla gracza " + playerName);
             return 0;
@@ -293,7 +294,7 @@ public class AdminCommand implements CommandBase {
     }
 
     private int profileStatRemove(CommandSender sender, String playerName, String statKey, int value) {
-        Optional<TPlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
+        Optional<TTPlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
         if (profile.isEmpty()) {
             sender.sendRichMessage("<red>Nie można znaleźć profilu dla gracza " + playerName);
             return 0;
@@ -312,7 +313,7 @@ public class AdminCommand implements CommandBase {
     }
 
     private int profileStatSet(CommandSender sender, String playerName, String statKey, int value) {
-        Optional<TPlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
+        Optional<TTPlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
         if (profile.isEmpty()) {
             sender.sendRichMessage("<red>Nie można znaleźć profilu dla gracza " + playerName);
             return 0;
@@ -331,7 +332,7 @@ public class AdminCommand implements CommandBase {
     }
 
     private int profileStatReset(CommandSender sender, String playerName) {
-        Optional<TPlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
+        Optional<TTPlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
         if (profile.isEmpty()) {
             sender.sendRichMessage("<red>Nie można znaleźć profilu dla gracza " + playerName);
             return 0;

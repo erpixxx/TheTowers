@@ -2,9 +2,9 @@ package dev.erpix.thetowers.model.tablist;
 
 import dev.erpix.thetowers.TheTowers;
 import dev.erpix.thetowers.model.ProfileStatKey;
-import dev.erpix.thetowers.model.TPlayer;
-import dev.erpix.thetowers.model.TPlayerProfile;
-import dev.erpix.thetowers.model.TTeam;
+import dev.erpix.thetowers.model.game.GamePlayer;
+import dev.erpix.thetowers.model.TTPlayerProfile;
+import dev.erpix.thetowers.model.game.GameTeam;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.placeholder.Placeholder;
@@ -28,7 +28,7 @@ public enum TPlayerPlaceholder {
 
     // Player's team placeholders
     PLAYER_TEAM("%tt_player_team%", -1,
-            fromPlayerTeam(TTeam::getDisplayName)),
+            fromPlayerTeam(GameTeam::getDisplayName)),
     PLAYER_TEAM_LEADER("%tt_player_team_leader%", -1,
             fromPlayerTeam(team -> team.getLeader().getDisplayName())),
     PLAYER_TEAM_MEMBER_1("%tt_player_team_member_1%", -1,
@@ -139,15 +139,15 @@ public enum TPlayerPlaceholder {
     // Helper methods to create functions
     //
 
-    private static @NotNull Function<TabPlayer, String> fromPlayer(@NotNull Function<TPlayer, String> fn) {
+    private static @NotNull Function<TabPlayer, String> fromPlayer(@NotNull Function<GamePlayer, String> fn) {
         return tabPlayer -> TheTowers.getInstance().getPlayerManager().getPlayer(tabPlayer.getName())
                 .map(fn)
                 .orElse("");
     }
 
-    private static @NotNull Function<TabPlayer, String> fromPlayerTeam(@NotNull Function<TTeam, String> fn) {
+    private static @NotNull Function<TabPlayer, String> fromPlayerTeam(@NotNull Function<GameTeam, String> fn) {
         return tabPlayer -> fromPlayer(player -> {
-            TTeam team = player.getTeam();
+            GameTeam team = player.getTeam();
             return team != null ? fn.apply(team) : "";
         }).apply(tabPlayer);
     }
@@ -156,12 +156,12 @@ public enum TPlayerPlaceholder {
         return tabPlayer -> fromPlayerTeam(team -> team.getMembers().stream()
                 .skip(n)
                 .findFirst()
-                .map(TPlayer::getDisplayName)
+                .map(GamePlayer::getDisplayName)
                 .orElse("")
         ).apply(tabPlayer);
     }
 
-    private static @NotNull Function<TabPlayer, String> fromPlayerProfile(@NotNull Function<TPlayerProfile, String> fn) {
+    private static @NotNull Function<TabPlayer, String> fromPlayerProfile(@NotNull Function<TTPlayerProfile, String> fn) {
         return tabPlayer -> TheTowers.getInstance().getProfileManager().getProfile(tabPlayer.getName())
                 .map(fn)
                 .orElse("");

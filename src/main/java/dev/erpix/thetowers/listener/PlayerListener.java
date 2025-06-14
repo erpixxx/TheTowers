@@ -1,15 +1,12 @@
 package dev.erpix.thetowers.listener;
 
 import dev.erpix.thetowers.TheTowers;
-import dev.erpix.thetowers.model.TGame;
-import dev.erpix.thetowers.model.TPlayer;
-import dev.erpix.thetowers.model.TTeam;
+import dev.erpix.thetowers.model.game.GameSession;
+import dev.erpix.thetowers.model.game.GamePlayer;
+import dev.erpix.thetowers.model.game.GameTeam;
 import dev.erpix.thetowers.util.Components;
 import dev.erpix.thetowers.util.Disguises;
 import io.papermc.paper.event.player.AsyncChatEvent;
-import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.api.tablist.layout.Layout;
-import me.neznamy.tab.api.tablist.layout.LayoutManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
@@ -40,20 +37,20 @@ public class PlayerListener implements Listener {
 
         event.joinMessage(joinMessage(player));
 
-        TPlayer tPlayer = theTowers.getPlayerManager().addPlayer(player);
+        GamePlayer gamePlayer = theTowers.getPlayerManager().addPlayer(player);
         theTowers.getProfileManager().load(player.getName());
 
-        TTeam team = tPlayer.getTeam();
+        GameTeam team = gamePlayer.getTeam();
         if (team == null) {
-            theTowers.getGame().addSpectator(tPlayer);
+            theTowers.getGame().addSpectator(gamePlayer);
         }
 
-        TGame game = theTowers.getGame();
-        TGame.Stage stage = game.getStage();
-        if (stage == TGame.Stage.LOBBY) {
+        GameSession game = theTowers.getGame();
+        GameSession.Stage stage = game.getStage();
+        if (stage == GameSession.Stage.LOBBY) {
             player.teleport(theTowers.getSpawnLocation());
         }
-        else if (stage == TGame.Stage.WAITING) {
+        else if (stage == GameSession.Stage.WAITING) {
             player.teleport(game.getMap().getWaitingRoomLocation());
         } else {
             if (team != null) {

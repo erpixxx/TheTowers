@@ -1,5 +1,6 @@
-package dev.erpix.thetowers.model;
+package dev.erpix.thetowers.util;
 
+import dev.erpix.thetowers.model.game.GamePlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -19,8 +20,8 @@ import java.util.function.Consumer;
 public class OrderedAttackerCache implements Iterable<OrderedAttackerCache.AttackerEntry>, AutoCloseable {
 
     private final long ttlMillis;
-    private final Map<TPlayer, AttackerEntry> playerMap;
-    private final NavigableMap<DamageKey, TPlayer> damageMap;
+    private final Map<GamePlayer, AttackerEntry> playerMap;
+    private final NavigableMap<DamageKey, GamePlayer> damageMap;
     private boolean registered = false;
 
     public OrderedAttackerCache(long ttlSeconds) {
@@ -38,7 +39,7 @@ public class OrderedAttackerCache implements Iterable<OrderedAttackerCache.Attac
      * @param player The attacker who dealt the damage.
      * @param damage The amount of damage dealt by the attacker.
      */
-    public void put(@NotNull TPlayer player, double damage) {
+    public void put(@NotNull GamePlayer player, double damage) {
         long now = System.currentTimeMillis();
 
         // Check if the attacker already exists in the cache
@@ -64,7 +65,7 @@ public class OrderedAttackerCache implements Iterable<OrderedAttackerCache.Attac
      * @param player The attacker whose damage is to be retrieved.
      * @return The amount of damage dealt by the attacker, or null if the attacker is not in the cache.
      */
-    public @Nullable Double getDamage(@NotNull TPlayer player) {
+    public @Nullable Double getDamage(@NotNull GamePlayer player) {
         AttackerEntry entry = playerMap.get(player);
         return entry != null ? entry.damage : null;
     }
@@ -78,7 +79,7 @@ public class OrderedAttackerCache implements Iterable<OrderedAttackerCache.Attac
     public @NotNull @Unmodifiable List<AttackerEntry> getAttackers() {
         List<AttackerEntry> result = new ArrayList<>();
 
-        for (TPlayer player : damageMap.values()) {
+        for (GamePlayer player : damageMap.values()) {
             AttackerEntry entry = playerMap.get(player);
             if (entry != null) {
                 result.add(entry);
@@ -93,11 +94,11 @@ public class OrderedAttackerCache implements Iterable<OrderedAttackerCache.Attac
      */
     public void cleanUp() {
         long now = System.currentTimeMillis();
-        Iterator<Map.Entry<TPlayer, AttackerEntry>> it = playerMap.entrySet().iterator();
+        Iterator<Map.Entry<GamePlayer, AttackerEntry>> it = playerMap.entrySet().iterator();
 
         while (it.hasNext()) {
-            Map.Entry<TPlayer, AttackerEntry> mapEntry = it.next();
-            TPlayer player = mapEntry.getKey();
+            Map.Entry<GamePlayer, AttackerEntry> mapEntry = it.next();
+            GamePlayer player = mapEntry.getKey();
             AttackerEntry entry = mapEntry.getValue();
 
             if (now - entry.timestamp > ttlMillis) {
@@ -137,7 +138,7 @@ public class OrderedAttackerCache implements Iterable<OrderedAttackerCache.Attac
      * @param damage The amount of damage dealt by the attacker.
      * @param timestamp The timestamp when the damage was dealt.
      */
-    public record AttackerEntry(@NotNull TPlayer attacker, double damage, long timestamp) { }
+    public record AttackerEntry(@NotNull GamePlayer attacker, double damage, long timestamp) { }
 
     /**
      * Helper class to handle same damage values in the sorted map
