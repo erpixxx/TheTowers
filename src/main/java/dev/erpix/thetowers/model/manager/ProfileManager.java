@@ -2,7 +2,7 @@ package dev.erpix.thetowers.model.manager;
 
 import com.google.gson.Gson;
 import dev.erpix.thetowers.TheTowers;
-import dev.erpix.thetowers.model.TTPlayerProfile;
+import dev.erpix.thetowers.model.PlayerProfile;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +21,7 @@ public class ProfileManager {
     private static final ComponentLogger logger = TheTowers.getInstance().getLogger();
 
     private final Path profilesDir = TheTowers.getInstance().getPlugin().getDataPath().resolve("profiles");
-    private final Map<String, TTPlayerProfile> profiles = new HashMap<>();
+    private final Map<String, PlayerProfile> profiles = new HashMap<>();
     private final Gson gson = new Gson();
 
     /**
@@ -49,7 +49,7 @@ public class ProfileManager {
      */
     public void load(@NotNull String playerName) {
         try (FileReader reader = new FileReader(jsonFile(playerName))) {
-            TTPlayerProfile profile = gson.fromJson(reader, TTPlayerProfile.class);
+            PlayerProfile profile = gson.fromJson(reader, PlayerProfile.class);
 
             if (profile == null || profile.getName().isEmpty()) {
                 profile = createProfile(playerName);
@@ -72,7 +72,7 @@ public class ProfileManager {
      */
     public void save(@NotNull String playerName) {
         try (FileWriter writer = new FileWriter(jsonFile(playerName))) {
-            TTPlayerProfile profile = profiles.get(playerName);
+            PlayerProfile profile = profiles.get(playerName);
 
             if (profile == null) {
                 logger.warn("Cannot save profile for '{}', profile not found", playerName);
@@ -89,7 +89,7 @@ public class ProfileManager {
      * Saves all player profiles to their respective JSON files.
      */
     public void saveAll() {
-        for (TTPlayerProfile profile : profiles.values()) {
+        for (PlayerProfile profile : profiles.values()) {
             save(profile.getName());
         }
         logger.info("All player profiles saved successfully.");
@@ -100,9 +100,9 @@ public class ProfileManager {
      * Retrieves a player's profile from memory.
      *
      * @param name the name of the player whose profile is to be retrieved.
-     * @return the {@link TTPlayerProfile}, or null if not found.
+     * @return the {@link PlayerProfile}, or null if not found.
      */
-    public @NotNull Optional<TTPlayerProfile> getProfile(@NotNull String name) {
+    public @NotNull Optional<PlayerProfile> getProfile(@NotNull String name) {
         return Optional.ofNullable(this.profiles.get(name));
     }
 
@@ -110,10 +110,10 @@ public class ProfileManager {
      * Creates a new profile for a player and stores it in memory.
      *
      * @param name the name of the player for whom the profile is to be created.
-     * @return the newly created {@link TTPlayerProfile}.
+     * @return the newly created {@link PlayerProfile}.
      */
-    private @NotNull TTPlayerProfile createProfile(@NotNull String name) {
-        TTPlayerProfile profile = new TTPlayerProfile(name);
+    private @NotNull PlayerProfile createProfile(@NotNull String name) {
+        PlayerProfile profile = new PlayerProfile(name);
         this.profiles.put(name, profile);
 
         logger.info("Created new profile for player '{}'", name);

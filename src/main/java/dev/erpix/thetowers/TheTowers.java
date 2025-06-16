@@ -3,7 +3,6 @@ package dev.erpix.thetowers;
 import dev.erpix.thetowers.command.*;
 import dev.erpix.thetowers.command.dev.SetNameCmd;
 import dev.erpix.thetowers.command.dev.ShowAttributesCmd;
-import dev.erpix.thetowers.command.dev.StatsCmd;
 import dev.erpix.thetowers.listener.EntityListener;
 import dev.erpix.thetowers.listener.PlayerListener;
 import dev.erpix.thetowers.model.game.GameMap;
@@ -256,8 +255,7 @@ public class TheTowers {
                 new RulesCommand(),
 
                 new SetNameCmd(),
-                new ShowAttributesCmd(),
-                new StatsCmd()
+                new ShowAttributesCmd()
         );
     }
 

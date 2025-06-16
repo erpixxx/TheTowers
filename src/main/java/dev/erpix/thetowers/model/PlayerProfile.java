@@ -5,12 +5,12 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Represents the profile of a player in the game.
  */
-public class TTPlayerProfile {
+public class PlayerProfile {
 
     private final String name;
-    private final TotalStats stats = new TotalStats();
+    private final StatsTracker stats = new StatsTracker();
 
-    public TTPlayerProfile(@NotNull String name) {
+    public PlayerProfile(@NotNull String name) {
         this.name = name;
     }
 
@@ -28,7 +28,7 @@ public class TTPlayerProfile {
      *
      * @return the {@link StatsTracker} for the player's profile
      */
-    public @NotNull StatsTracker<ProfileStatKey> getStats() {
+    public @NotNull StatsTracker getStats() {
         return stats;
     }
 

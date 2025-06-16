@@ -1,7 +1,7 @@
 package dev.erpix.thetowers.model.game;
 
 import dev.erpix.thetowers.TheTowers;
-import dev.erpix.thetowers.model.GameStatKey;
+import dev.erpix.thetowers.model.PlayerStat;
 import dev.erpix.thetowers.util.Components;
 import dev.erpix.thetowers.util.OrderedAttackerCache;
 import net.kyori.adventure.text.Component;
@@ -237,7 +237,7 @@ public class GameSession {
         Optional<Player> playerOpt = victim.getBukkitPlayer();
         if (playerOpt.isEmpty()) return;
         Player victimPlayer = playerOpt.get();
-        victim.getStats().incrementStat(GameStatKey.DEATHS);
+        victim.getStats().incrementStat(PlayerStat.DEATHS);
         victim.setAlive(false);
 
         victimPlayer.setGameMode(GameMode.SPECTATOR);
@@ -276,11 +276,11 @@ public class GameSession {
         TheTowers.getInstance().getPlayerManager().getPlayer(attackerPlayer.getName()).ifPresent(attackerTPlayer -> {
             victim.getAttackers().forEach(atk -> {
                 if (!atk.attacker().equals(attackerTPlayer)) {
-                    atk.attacker().getStats().incrementStat(GameStatKey.ASSISTS);
+                    atk.attacker().getStats().incrementStat(PlayerStat.ASSISTS);
                 }
             });
             victim.getAttackers().cleanUp();
-            attackerTPlayer.getStats().incrementStat(GameStatKey.KILLS);
+            attackerTPlayer.getStats().incrementStat(PlayerStat.KILLS);
             attackerTPlayer.getTeam().addSouls(1);
             broadcastDeathMessage(victim, attackerTPlayer.getDisplayName());
             attackerPlayer.playSound(victimPlayer, Sound.BLOCK_METAL_BREAK, 1.0f, 1.0f);

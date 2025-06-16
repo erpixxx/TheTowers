@@ -3,24 +3,15 @@ package dev.erpix.thetowers.model;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
-import java.util.EnumMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Spliterator;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
- * Abstract class for managing statistics storage using an Enum as keys.
- *
- * @param <E> the type of Enum used as keys for the statistics.
+ * A class for managing player statistics.
  */
-public abstract class StatsTracker<E extends Enum<E>> implements Iterable<Map.Entry<E, Integer>> {
+public class StatsTracker implements Iterable<Map.Entry<PlayerStat, Integer>> {
 
-    private final Map<E, Integer> stats;
-
-    public StatsTracker(@NotNull Class<E> enumClass) {
-        this.stats = new EnumMap<>(enumClass);
-    }
+    private final Map<PlayerStat, Integer> stats = new HashMap<>();
 
     /**
      * Retrieves the value of a specific statistic.
@@ -28,7 +19,7 @@ public abstract class StatsTracker<E extends Enum<E>> implements Iterable<Map.En
      * @param key the Enum key representing the statistic.
      * @return the value of the statistic, or 0 if not present.
      */
-    public int getStat(@NotNull E key) {
+    public int getStat(@NotNull PlayerStat key) {
         return stats.getOrDefault(key, 0);
     }
 
@@ -39,7 +30,7 @@ public abstract class StatsTracker<E extends Enum<E>> implements Iterable<Map.En
      * @param second the second statistic.
      * @return the ratio of the first statistic to the second, or 0 if the second is 0.
      */
-    public double getRatio(@NotNull E first, @NotNull E second) {
+    public double getRatio(@NotNull PlayerStat first, @NotNull PlayerStat second) {
         int firstValue = getStat(first);
         int secondValue = getStat(second);
         return secondValue == 0 ? 0 : (double) firstValue / secondValue;
@@ -50,7 +41,7 @@ public abstract class StatsTracker<E extends Enum<E>> implements Iterable<Map.En
      *
      * @param key the Enum key representing the statistic.
      */
-    public void incrementStat(@NotNull E key) {
+    public void incrementStat(@NotNull PlayerStat key) {
         stats.merge(key, 1, Integer::sum);
     }
 
@@ -60,7 +51,7 @@ public abstract class StatsTracker<E extends Enum<E>> implements Iterable<Map.En
      * @param key the Enum key representing the statistic.
      * @param value the value to increment the statistic by (must be non-negative).
      */
-    public void incrementStat(@NotNull E key, @Range(from = 0, to = Integer.MAX_VALUE) int value) {
+    public void incrementStat(@NotNull PlayerStat key, @Range(from = 0, to = Integer.MAX_VALUE) int value) {
         stats.merge(key, value, Integer::sum);
     }
 
@@ -69,7 +60,7 @@ public abstract class StatsTracker<E extends Enum<E>> implements Iterable<Map.En
      *
      * @param key the Enum key representing the statistic.
      */
-    public void decrementStat(@NotNull E key) {
+    public void decrementStat(@NotNull PlayerStat key) {
         stats.merge(key, -1, Integer::sum);
     }
 
@@ -79,7 +70,7 @@ public abstract class StatsTracker<E extends Enum<E>> implements Iterable<Map.En
      * @param key the Enum key representing the statistic.
      * @param value the value to decrement the statistic by (must be non-negative).
      */
-    public void decrementStat(@NotNull E key, @Range(from = 0, to = Integer.MAX_VALUE) int value) {
+    public void decrementStat(@NotNull PlayerStat key, @Range(from = 0, to = Integer.MAX_VALUE) int value) {
         stats.merge(key, -value, Integer::sum);
     }
 
@@ -89,7 +80,7 @@ public abstract class StatsTracker<E extends Enum<E>> implements Iterable<Map.En
      * @param key the Enum key representing the statistic
      * @param value the value to set for the statistic
      */
-    public void setStat(@NotNull E key, int value) {
+    public void setStat(@NotNull PlayerStat key, int value) {
         stats.put(key, value);
     }
 
@@ -101,17 +92,17 @@ public abstract class StatsTracker<E extends Enum<E>> implements Iterable<Map.En
     }
 
     @Override
-    public @NotNull Iterator<Map.Entry<E, Integer>> iterator() {
+    public @NotNull Iterator<Map.Entry<PlayerStat, Integer>> iterator() {
         return stats.entrySet().iterator();
     }
 
     @Override
-    public void forEach(Consumer<? super Map.Entry<E, Integer>> action) {
+    public void forEach(Consumer<? super Map.Entry<PlayerStat, Integer>> action) {
         stats.entrySet().forEach(action);
     }
 
     @Override
-    public Spliterator<Map.Entry<E, Integer>> spliterator() {
+    public Spliterator<Map.Entry<PlayerStat, Integer>> spliterator() {
         return stats.entrySet().spliterator();
     }
 

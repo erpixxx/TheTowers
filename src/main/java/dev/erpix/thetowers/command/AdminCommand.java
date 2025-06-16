@@ -18,7 +18,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -252,13 +251,13 @@ public class AdminCommand implements CommandBase {
 
     private RequiredArgumentBuilder<CommandSourceStack, String> statArgument() {
         return Commands.argument("stat", StringArgumentType.word())
-                .suggests(SuggestionProviders.fromCollection(Arrays.stream(ProfileStatKey.values())
-                        .map(ProfileStatKey::getKey)
+                .suggests(SuggestionProviders.fromCollection(PlayerStat.values().stream()
+                        .map(PlayerStat::getKey)
                         .toList()));
     }
 
     private int profile(CommandSender sender, String playerName) {
-        Optional<TTPlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
+        Optional<PlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
         if (profile.isEmpty()) {
             sender.sendRichMessage("<red>Nie można znaleźć profilu dla gracza " + playerName);
             return 0;
@@ -275,13 +274,13 @@ public class AdminCommand implements CommandBase {
     }
 
     private int profileStatAdd(CommandSender sender, String playerName, String statKey, int value) {
-        Optional<TTPlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
+        Optional<PlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
         if (profile.isEmpty()) {
             sender.sendRichMessage("<red>Nie można znaleźć profilu dla gracza " + playerName);
             return 0;
         }
 
-        ProfileStatKey stat = ProfileStatKey.fromKey(statKey);
+        PlayerStat stat = PlayerTotalStat.fromKey(statKey);
         if (stat == null) {
             sender.sendRichMessage("<red>Nie znaleziono statystyki: " + statKey);
             return 0;
@@ -294,13 +293,13 @@ public class AdminCommand implements CommandBase {
     }
 
     private int profileStatRemove(CommandSender sender, String playerName, String statKey, int value) {
-        Optional<TTPlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
+        Optional<PlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
         if (profile.isEmpty()) {
             sender.sendRichMessage("<red>Nie można znaleźć profilu dla gracza " + playerName);
             return 0;
         }
 
-        ProfileStatKey stat = ProfileStatKey.fromKey(statKey);
+        PlayerStat stat = PlayerTotalStat.fromKey(statKey);
         if (stat == null) {
             sender.sendRichMessage("<red>Nie znaleziono statystyki: " + statKey);
             return 0;
@@ -313,13 +312,13 @@ public class AdminCommand implements CommandBase {
     }
 
     private int profileStatSet(CommandSender sender, String playerName, String statKey, int value) {
-        Optional<TTPlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
+        Optional<PlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
         if (profile.isEmpty()) {
             sender.sendRichMessage("<red>Nie można znaleźć profilu dla gracza " + playerName);
             return 0;
         }
 
-        ProfileStatKey stat = ProfileStatKey.fromKey(statKey);
+        PlayerStat stat = PlayerTotalStat.fromKey(statKey);
         if (stat == null) {
             sender.sendRichMessage("<red>Nie znaleziono statystyki: " + statKey);
             return 0;
@@ -332,7 +331,7 @@ public class AdminCommand implements CommandBase {
     }
 
     private int profileStatReset(CommandSender sender, String playerName) {
-        Optional<TTPlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
+        Optional<PlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
         if (profile.isEmpty()) {
             sender.sendRichMessage("<red>Nie można znaleźć profilu dla gracza " + playerName);
             return 0;

@@ -1,6 +1,5 @@
 package dev.erpix.thetowers.model.game;
 
-import dev.erpix.thetowers.model.GameStatKey;
 import dev.erpix.thetowers.model.StatsTracker;
 import dev.erpix.thetowers.util.OrderedAttackerCache;
 import net.kyori.adventure.text.Component;
@@ -20,7 +19,7 @@ public class GamePlayer {
 
     private final String name;
     private final OrderedAttackerCache attackers = new OrderedAttackerCache(10);
-    private final GameStats stats = new GameStats();
+    private final StatsTracker stats = new StatsTracker();
     private GameTeam team;
     private boolean isAlive = true;
 
@@ -41,7 +40,7 @@ public class GamePlayer {
      * Executes the provided action for the Bukkit Player if they are online, otherwise fails silently.
      *
      * @param action The action to perform on the Bukkit Player.
-     * @return true if the attacker is online and the action was executed, false otherwise.
+     * @return true if the player is online and the action was executed, false otherwise.
      */
     public boolean doAsBukkitPlayer(@NotNull Consumer<Player> action) {
         Optional<Player> player = getBukkitPlayer();
@@ -130,7 +129,7 @@ public class GamePlayer {
      *
      * @return The stats container containing various in-game statistics for the player.
      */
-    public @NotNull StatsTracker<GameStatKey> getStats() {
+    public @NotNull StatsTracker getStats() {
         return stats;
     }
 

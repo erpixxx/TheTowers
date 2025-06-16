@@ -27,7 +27,7 @@ public class GameTeam {
         this.leader = leader;
         this.tag = tag;
         this.color = color;
-        this.heartHealth = 100;
+        this.heartHealth = 100; // The default heart health is 100, but
         addMember(leader);
     }
 

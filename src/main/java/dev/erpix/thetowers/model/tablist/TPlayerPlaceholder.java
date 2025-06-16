@@ -1,9 +1,10 @@
 package dev.erpix.thetowers.model.tablist;
 
 import dev.erpix.thetowers.TheTowers;
-import dev.erpix.thetowers.model.ProfileStatKey;
+import dev.erpix.thetowers.model.PlayerProfile;
+import dev.erpix.thetowers.model.PlayerStat;
+import dev.erpix.thetowers.model.PlayerTotalStat;
 import dev.erpix.thetowers.model.game.GamePlayer;
-import dev.erpix.thetowers.model.TTPlayerProfile;
 import dev.erpix.thetowers.model.game.GameTeam;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
@@ -50,20 +51,20 @@ public enum TPlayerPlaceholder {
 
     // Player's profile placeholders
     PLAYER_TOTAL_ASSISTS("%tt_player_total_assists%", -1,
-            getStat(ProfileStatKey.ASSISTS)),
+            getStat(PlayerTotalStat.ASSISTS)),
     PLAYER_TOTAL_DEATHS("%tt_player_total_deaths%", -1,
-            getStat(ProfileStatKey.DEATHS)),
+            getStat(PlayerTotalStat.DEATHS)),
     PLAYER_TOTAL_GAMES_PLAYED("%tt_player_total_games_played%", -1,
-            getStat(ProfileStatKey.GAMES_PLAYED)),
+            getStat(PlayerTotalStat.GAMES_PLAYED)),
     PLAYER_TOTAL_HEART_DAMAGE("%tt_player_total_heart_damage%", -1,
-            getStat(ProfileStatKey.HEART_DAMAGE)),
+            getStat(PlayerTotalStat.HEART_DAMAGE)),
     PLAYER_TOTAL_KD("%tt_player_total_kd%", -1,
             fromPlayerProfile(profile -> String.valueOf(profile.getStats()
-                    .getRatio(ProfileStatKey.KILLS, ProfileStatKey.DEATHS)))),
+                    .getRatio(PlayerTotalStat.KILLS, PlayerTotalStat.DEATHS)))),
     PLAYER_TOTAL_KILLS("%tt_player_total_kills%", -1,
-            getStat(ProfileStatKey.KILLS)),
+            getStat(PlayerTotalStat.KILLS)),
     PLAYER_TOTAL_TOWERS_DESTROYED("%tt_player_total_towers_destroyed%", -1,
-            getStat(ProfileStatKey.TOWERS_DESTROYED));
+            getStat(PlayerTotalStat.TOWERS_DESTROYED));
 
     private static final TabAPI TAB = TabAPI.getInstance();
     private final String placeholder;
@@ -161,13 +162,13 @@ public enum TPlayerPlaceholder {
         ).apply(tabPlayer);
     }
 
-    private static @NotNull Function<TabPlayer, String> fromPlayerProfile(@NotNull Function<TTPlayerProfile, String> fn) {
+    private static @NotNull Function<TabPlayer, String> fromPlayerProfile(@NotNull Function<PlayerProfile, String> fn) {
         return tabPlayer -> TheTowers.getInstance().getProfileManager().getProfile(tabPlayer.getName())
                 .map(fn)
                 .orElse("");
     }
 
-    private static @NotNull Function<TabPlayer, String> getStat(@NotNull ProfileStatKey stat) {
+    private static @NotNull Function<TabPlayer, String> getStat(@NotNull PlayerStat stat) {
         return tabPlayer -> fromPlayerProfile(profile ->
                 String.valueOf(profile.getStats().getStat(stat))
         ).apply(tabPlayer);
