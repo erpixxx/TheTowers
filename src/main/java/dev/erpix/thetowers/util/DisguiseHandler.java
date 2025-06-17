@@ -14,9 +14,9 @@ import java.util.Optional;
 /**
  * Utility class for managing player disguises.
  */
-public final class Disguises {
+public final class DisguiseHandler {
 
-    private Disguises() { }
+    private DisguiseHandler() { }
 
     /**
      * Creates a disguise for the player that shows their team and health.

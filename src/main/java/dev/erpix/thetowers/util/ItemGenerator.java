@@ -22,39 +22,39 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 @SuppressWarnings("UnstableApiUsage")
-public final class Items {
+public final class ItemGenerator {
 
     /**
      * A map of item names to their corresponding item stack suppliers.
      */
     public static final Map<String, Supplier<ItemStack>> ITEMS = new HashMap<>() {{
-        put("tower_teleport",       Items::getTowerTeleport);
-        put("crossbow",             Items::getCrossbow);
-        put("bow",                  Items::getBow);
-        put("stone_axe",            Items::getStoneAxe);
-        put("stone_sword",          Items::getStoneSword);
-        put("stone_pickaxe",        Items::getStonePickaxe);
-        put("iron_axe",             Items::getIronAxe);
-        put("iron_sword",           Items::getIronSword);
-        put("iron_pickaxe",         Items::getIronPickaxe);
-        put("iron_helmet",          Items::getIronHelmet);
-        put("iron_chestplate",      Items::getIronChestplate);
-        put("iron_leggings",        Items::getIronLeggings);
-        put("iron_boots",           Items::getIronBoots);
-        put("diamond_axe",          Items::getDiamondAxe);
-        put("diamond_sword",        Items::getDiamondSword);
-        put("diamond_pickaxe",      Items::getDiamondPickaxe);
-        put("diamond_helmet",       Items::getDiamondHelmet);
-        put("diamond_chestplate",   Items::getDiamondChestplate);
-        put("diamond_leggings",     Items::getDiamondLeggings);
-        put("diamond_boots",        Items::getDiamondBoots);
-        put("netherite_axe",        Items::getNetheriteAxe);
-        put("netherite_sword",      Items::getNetheriteSword);
-        put("netherite_pickaxe",    Items::getNetheritePickaxe);
-        put("netherite_helmet",     Items::getNetheriteHelmet);
-        put("netherite_chestplate", Items::getNetheriteChestplate);
-        put("netherite_leggings",   Items::getNetheriteLeggings);
-        put("netherite_boots",      Items::getNetheriteBoots);
+        put("tower_teleport",       ItemGenerator::getTowerTeleport);
+        put("crossbow",             ItemGenerator::getCrossbow);
+        put("bow",                  ItemGenerator::getBow);
+        put("stone_axe",            ItemGenerator::getStoneAxe);
+        put("stone_sword",          ItemGenerator::getStoneSword);
+        put("stone_pickaxe",        ItemGenerator::getStonePickaxe);
+        put("iron_axe",             ItemGenerator::getIronAxe);
+        put("iron_sword",           ItemGenerator::getIronSword);
+        put("iron_pickaxe",         ItemGenerator::getIronPickaxe);
+        put("iron_helmet",          ItemGenerator::getIronHelmet);
+        put("iron_chestplate",      ItemGenerator::getIronChestplate);
+        put("iron_leggings",        ItemGenerator::getIronLeggings);
+        put("iron_boots",           ItemGenerator::getIronBoots);
+        put("diamond_axe",          ItemGenerator::getDiamondAxe);
+        put("diamond_sword",        ItemGenerator::getDiamondSword);
+        put("diamond_pickaxe",      ItemGenerator::getDiamondPickaxe);
+        put("diamond_helmet",       ItemGenerator::getDiamondHelmet);
+        put("diamond_chestplate",   ItemGenerator::getDiamondChestplate);
+        put("diamond_leggings",     ItemGenerator::getDiamondLeggings);
+        put("diamond_boots",        ItemGenerator::getDiamondBoots);
+        put("netherite_axe",        ItemGenerator::getNetheriteAxe);
+        put("netherite_sword",      ItemGenerator::getNetheriteSword);
+        put("netherite_pickaxe",    ItemGenerator::getNetheritePickaxe);
+        put("netherite_helmet",     ItemGenerator::getNetheriteHelmet);
+        put("netherite_chestplate", ItemGenerator::getNetheriteChestplate);
+        put("netherite_leggings",   ItemGenerator::getNetheriteLeggings);
+        put("netherite_boots",      ItemGenerator::getNetheriteBoots);
         put("blue_helmet",          () -> getLeatherHelmet(Color.fromRGB(Integer.parseInt(GameTeam.Color.BLUE.getColorHex(), 16))));
         put("red_helmet",           () -> getLeatherHelmet(Color.fromRGB(Integer.parseInt(GameTeam.Color.RED.getColorHex(), 16))));
         put("green_helmet",         () -> getLeatherHelmet(Color.fromRGB(Integer.parseInt(GameTeam.Color.GREEN.getColorHex(), 16))));
