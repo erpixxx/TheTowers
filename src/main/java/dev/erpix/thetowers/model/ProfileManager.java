@@ -1,8 +1,7 @@
-package dev.erpix.thetowers.model.manager;
+package dev.erpix.thetowers.model;
 
 import com.google.gson.Gson;
 import dev.erpix.thetowers.TheTowers;
-import dev.erpix.thetowers.model.PlayerProfile;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.jetbrains.annotations.NotNull;
 

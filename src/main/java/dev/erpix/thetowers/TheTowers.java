@@ -5,14 +5,15 @@ import dev.erpix.thetowers.command.dev.SetNameCmd;
 import dev.erpix.thetowers.command.dev.ShowAttributesCmd;
 import dev.erpix.thetowers.listener.EntityListener;
 import dev.erpix.thetowers.listener.PlayerListener;
+import dev.erpix.thetowers.model.game.GameManager;
 import dev.erpix.thetowers.model.game.GameMap;
-import dev.erpix.thetowers.model.game.GameSession;
 import dev.erpix.thetowers.model.game.GameTeam;
-import dev.erpix.thetowers.model.manager.PlayerManager;
-import dev.erpix.thetowers.model.manager.ProfileManager;
+import dev.erpix.thetowers.model.PlayerManager;
+import dev.erpix.thetowers.model.ProfileManager;
 import dev.erpix.thetowers.model.tablist.TabManager;
 import dev.erpix.thetowers.util.Components;
 import dev.erpix.thetowers.util.OrderedAttackerCache;
+import lombok.Getter;
 import me.libraryaddict.disguise.LibsDisguises;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.event.EventBus;
@@ -26,26 +27,35 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class TheTowers {
 
+    @NotNull @Getter
     private final ComponentLogger logger;
 
+    @Getter
     private static TheTowers instance;
 
+    @NotNull @Getter
     private final Plugin plugin;
+    @NotNull @Getter
     private final LibsDisguises libsDisguises;
+    @NotNull @Getter
     private final CommandRegistrar commandRegistrar;
     private final Map<String, GameMap> maps = new HashMap<>();
+    @Getter
     private Location spawnLocation;
+    @Getter
     private PlayerManager playerManager;
+    @Getter
     private ProfileManager profileManager;
+    @Getter
     private TabManager tabManager;
-    private GameSession game;
+    @Getter
+    private GameManager gameManager;
 
     @SuppressWarnings("UnstableApiUsage")
     public TheTowers(@NotNull Plugin plugin) {
@@ -54,10 +64,6 @@ public class TheTowers {
         this.commandRegistrar = new CommandRegistrar(plugin.getLifecycleManager());
         this.logger = plugin.getComponentLogger();
         instance = this;
-    }
-
-    public static @NotNull TheTowers getInstance() {
-        return instance;
     }
 
     public static @NotNull NamespacedKey key(@NotNull String key) {
@@ -178,9 +184,9 @@ public class TheTowers {
                     .collect(Collectors.joining(", ")));
         }
 
-        game = new GameSession();
+        gameManager = new GameManager();
         this.maps.values().stream().findFirst().ifPresent(tMap -> {
-            game.setMap(tMap);
+            gameManager.setMap(tMap);
             logger.info(Components.color("<green>Game map set to: <white>" + tMap.getName()));
         });
 
@@ -202,46 +208,6 @@ public class TheTowers {
     public void disable() {
         this.profileManager.saveAll();
         OrderedAttackerCache.Manager.getInstance().shutdown();
-    }
-
-    public @NotNull ComponentLogger getLogger() {
-        return logger;
-    }
-
-    public @NotNull Plugin getPlugin() {
-        return plugin;
-    }
-
-    public @NotNull LibsDisguises getLibsDisguises() {
-        return libsDisguises;
-    }
-
-    public @Nullable GameMap getMap(String name) {
-        return maps.get(name);
-    }
-
-    public @NotNull Location getSpawnLocation() {
-        return spawnLocation;
-    }
-
-    public @NotNull Collection<GameMap> getMaps() {
-        return maps.values();
-    }
-
-    public @NotNull PlayerManager getPlayerManager() {
-        return playerManager;
-    }
-
-    public @NotNull ProfileManager getProfileManager() {
-        return profileManager;
-    }
-
-    public @NotNull TabManager getTabManager() {
-        return tabManager;
-    }
-
-    public @NotNull GameSession getGame() {
-        return game;
     }
 
     private void registerCommands() {

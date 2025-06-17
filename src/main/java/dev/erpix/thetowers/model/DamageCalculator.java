@@ -1,10 +1,9 @@
 package dev.erpix.thetowers.model;
 
 import dev.erpix.thetowers.TheTowers;
+import dev.erpix.thetowers.model.game.GameManager;
 import dev.erpix.thetowers.model.game.GamePlayer;
-import dev.erpix.thetowers.model.game.GameSession;
 import dev.erpix.thetowers.model.game.GameTeam;
-import dev.erpix.thetowers.model.manager.PlayerManager;
 import dev.erpix.thetowers.util.Disguises;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import org.bukkit.*;
@@ -50,7 +49,7 @@ public final class DamageCalculator {
         double newHealth = currentHealth - damage;
 
         TheTowers theTowers = TheTowers.getInstance();
-        GameSession game = theTowers.getGame();
+        GameManager game = theTowers.getGameManager();
         PlayerManager playerManager = theTowers.getPlayerManager();
 
         // Get attacker and target TPlayer instances

@@ -7,28 +7,28 @@ import java.util.*;
 import java.util.function.Consumer;
 
 /**
- * A class for managing player statistics.
+ * Stores and manages player statistics.
  */
 public class StatsTracker implements Iterable<Map.Entry<PlayerStat, Integer>> {
 
     private final Map<PlayerStat, Integer> stats = new HashMap<>();
 
     /**
-     * Retrieves the value of a specific statistic.
+     * Retrieves the current value of a specific statistic.
      *
-     * @param key the Enum key representing the statistic.
-     * @return the value of the statistic, or 0 if not present.
+     * @param key the stat key.
+     * @return the value or 0 if not present.
      */
     public int getStat(@NotNull PlayerStat key) {
         return stats.getOrDefault(key, 0);
     }
 
     /**
-     * Retrieves the ratio of two statistics.
+     * Retrieves the ratio of two statistics. (safe against division by zero)
      *
      * @param first the first statistic.
      * @param second the second statistic.
-     * @return the ratio of the first statistic to the second, or 0 if the second is 0.
+     * @return the ratio of the first statistic to the second.
      */
     public double getRatio(@NotNull PlayerStat first, @NotNull PlayerStat second) {
         int firstValue = getStat(first);
@@ -39,7 +39,7 @@ public class StatsTracker implements Iterable<Map.Entry<PlayerStat, Integer>> {
     /**
      * Increments the value of a specific statistic by 1.
      *
-     * @param key the Enum key representing the statistic.
+     * @param key the stat key.
      */
     public void incrementStat(@NotNull PlayerStat key) {
         stats.merge(key, 1, Integer::sum);
@@ -48,17 +48,17 @@ public class StatsTracker implements Iterable<Map.Entry<PlayerStat, Integer>> {
     /**
      * Increments the value of a specific statistic by a given value.
      *
-     * @param key the Enum key representing the statistic.
-     * @param value the value to increment the statistic by (must be non-negative).
+     * @param key the stat key.
+     * @param value the value to increment the statistic by.
      */
-    public void incrementStat(@NotNull PlayerStat key, @Range(from = 0, to = Integer.MAX_VALUE) int value) {
+    public void incrementStat(@NotNull PlayerStat key, int value) {
         stats.merge(key, value, Integer::sum);
     }
 
     /**
      * Decrements the value of a specific statistic by 1.
      *
-     * @param key the Enum key representing the statistic.
+     * @param key the stat key.
      */
     public void decrementStat(@NotNull PlayerStat key) {
         stats.merge(key, -1, Integer::sum);
@@ -67,25 +67,25 @@ public class StatsTracker implements Iterable<Map.Entry<PlayerStat, Integer>> {
     /**
      * Decrements the value of a specific statistic by a given value.
      *
-     * @param key the Enum key representing the statistic.
-     * @param value the value to decrement the statistic by (must be non-negative).
+     * @param key the stat key.
+     * @param value the value to decrement the statistic by.
      */
-    public void decrementStat(@NotNull PlayerStat key, @Range(from = 0, to = Integer.MAX_VALUE) int value) {
+    public void decrementStat(@NotNull PlayerStat key, int value) {
         stats.merge(key, -value, Integer::sum);
     }
 
     /**
      * Sets the value of a specific statistic.
      *
-     * @param key the Enum key representing the statistic
-     * @param value the value to set for the statistic
+     * @param key the stat key.
+     * @param value the value to set.
      */
     public void setStat(@NotNull PlayerStat key, int value) {
         stats.put(key, value);
     }
 
     /**
-     * Clears all statistics, resetting them to zero.
+     * Clears all stats, resetting them to zero.
      */
     public void reset() {
         stats.replaceAll((k, v) -> 0);

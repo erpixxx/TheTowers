@@ -6,6 +6,7 @@ import dev.erpix.thetowers.model.PlayerStat;
 import dev.erpix.thetowers.model.PlayerTotalStat;
 import dev.erpix.thetowers.model.game.GamePlayer;
 import dev.erpix.thetowers.model.game.GameTeam;
+import lombok.Getter;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.placeholder.Placeholder;
@@ -25,6 +26,7 @@ import java.util.function.Function;
  * </p>
 
  */
+@Getter
 public enum TPlayerPlaceholder {
 
     // Player's team placeholders
@@ -67,42 +69,16 @@ public enum TPlayerPlaceholder {
             getStat(PlayerTotalStat.TOWERS_DESTROYED));
 
     private static final TabAPI TAB = TabAPI.getInstance();
+    @NotNull
     private final String placeholder;
     private final int refresh;
-    private final Function<TabPlayer, String> fn;
+    @NotNull
+    private final Function<TabPlayer, String> function;
 
-    TPlayerPlaceholder(String placeholder, int refresh, Function<TabPlayer, String> fn) {
+    TPlayerPlaceholder(@NotNull String placeholder, int refresh, @NotNull Function<TabPlayer, String> function) {
         this.placeholder = placeholder;
         this.refresh = refresh;
-        this.fn = fn;
-    }
-
-    /**
-     * Returns the string identifier of the placeholder.
-     *
-     * @return the placeholder string (e.g. "%tt_player_team%").
-     */
-    public @NotNull String getPlaceholder() {
-        return placeholder;
-    }
-
-    /**
-     * Returns the refresh interval for the placeholder.
-     *
-     * @return the refresh interval in ticks, or -1 if no automatic refresh.
-     */
-    public int getRefresh() {
-        return refresh;
-    }
-
-    /**
-     * Returns the function that calculates the placeholder's value
-     * for a given {@link TabPlayer}.
-     *
-     * @return the function mapping a TabPlayer to a placeholder value string.
-     */
-    public @NotNull Function<TabPlayer, String> getFunction() {
-        return fn;
+        this.function = function;
     }
 
     /**

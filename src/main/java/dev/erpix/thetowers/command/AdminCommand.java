@@ -7,8 +7,8 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.erpix.thetowers.TheTowers;
 import dev.erpix.thetowers.model.*;
+import dev.erpix.thetowers.model.game.GameManager;
 import dev.erpix.thetowers.model.game.GamePlayer;
-import dev.erpix.thetowers.model.game.GameSession;
 import dev.erpix.thetowers.model.game.GameTeam;
 import dev.erpix.thetowers.util.Colors;
 import dev.erpix.thetowers.util.Items;
@@ -83,7 +83,7 @@ public class AdminCommand implements CommandBase {
                                             String tag = ctx.getArgument("tag", String.class);
 
                                             TheTowers towers = TheTowers.getInstance();
-                                            GameSession game = towers.getGame();
+                                            GameManager game = towers.getGameManager();
                                             GameTeam team = game.getTeam(tag);
 
                                             if (team == null) {
@@ -119,7 +119,7 @@ public class AdminCommand implements CommandBase {
                                                             }
 
                                                             TheTowers towers = TheTowers.getInstance();
-                                                            GameSession game = towers.getGame();
+                                                            GameManager game = towers.getGameManager();
 
                                                             Optional<GameTeam> sameColor = game.getTeams().stream()
                                                                     .filter(team -> team.getColor() == color)
@@ -152,7 +152,7 @@ public class AdminCommand implements CommandBase {
                                                             int souls = ctx.getArgument("number", Integer.class);
 
                                                             TheTowers towers = TheTowers.getInstance();
-                                                            GameSession game = towers.getGame();
+                                                            GameManager game = towers.getGameManager();
                                                             GameTeam team = game.getTeam(tag);
 
                                                             if (team == null) {
@@ -175,7 +175,7 @@ public class AdminCommand implements CommandBase {
                                             String tag = ctx.getArgument("tag", String.class);
 
                                             TheTowers towers = TheTowers.getInstance();
-                                            GameSession game = towers.getGame();
+                                            GameManager game = towers.getGameManager();
                                             GameTeam team = game.getTeam(tag);
 
                                             if (team == null) {

@@ -1,10 +1,11 @@
 package dev.erpix.thetowers.model.tablist;
 
 import dev.erpix.thetowers.TheTowers;
-import dev.erpix.thetowers.model.game.GameSession;
+import dev.erpix.thetowers.model.game.GameManager;
 import dev.erpix.thetowers.model.game.GameTeam;
 import dev.erpix.thetowers.model.game.GameMap;
 import dev.erpix.thetowers.model.game.GamePlayer;
+import lombok.Getter;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.placeholder.Placeholder;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
@@ -27,6 +28,7 @@ import java.util.function.Supplier;
  * and team members.
  * </p>
  */
+@Getter
 public enum TServerPlaceholder {
 
     // Game placeholders
@@ -174,41 +176,16 @@ public enum TServerPlaceholder {
             fromTeam(GameTeam.Color.PURPLE, team -> String.valueOf(team.getHeartHealth())));
 
     private static final TabAPI TAB = TabAPI.getInstance();
+    @NotNull
     private final String placeholder;
     private final int refresh;
+    @NotNull
     private final Supplier<String> supplier;
 
-    TServerPlaceholder(String placeholder, int refresh, Supplier<String> supplier) {
+    TServerPlaceholder(@NotNull String placeholder, int refresh, @NotNull Supplier<String> supplier) {
         this.placeholder = placeholder;
         this.refresh = refresh;
         this.supplier = supplier;
-    }
-
-    /**
-     * Returns the string identifier of the placeholder.
-     *
-     * @return the placeholder string (e.g. "%tt_game_map%").
-     */
-    public @NotNull String getPlaceholder() {
-        return placeholder;
-    }
-
-    /**
-     * Returns the refresh interval for the placeholder.
-     *
-     * @return the refresh interval in ticks, or -1 if no automatic refresh.
-     */
-    public int getRefresh() {
-        return refresh;
-    }
-
-    /**
-     * Returns the supplier function providing the placeholder's current value.
-     *
-     * @return a {@link Supplier} that returns the current placeholder value.
-     */
-    public @NotNull Supplier<String> getSupplier() {
-        return supplier;
     }
 
     /**
@@ -250,9 +227,9 @@ public enum TServerPlaceholder {
 
         private static final Map<GameTeam.Color, TeamPlaceholders> COLORS = new EnumMap<>(GameTeam.Color.class);
 
-        private final GameTeam.Color color;
-        private final TServerPlaceholder namePlaceholder;
-        private final TServerPlaceholder heartHealthPlaceholder;
+        @Getter private final GameTeam.Color color;
+        @Getter private final TServerPlaceholder namePlaceholder;
+        @Getter private final TServerPlaceholder heartHealthPlaceholder;
         private final TServerPlaceholder[] memberPlaceholders;
 
         private TeamPlaceholders(GameTeam.Color color) {
@@ -322,18 +299,6 @@ public enum TServerPlaceholder {
             }
         }
 
-        public @NotNull GameTeam.Color getColor() {
-            return color;
-        }
-
-        public @NotNull TServerPlaceholder getNamePlaceholder() {
-            return namePlaceholder;
-        }
-
-        public @NotNull TServerPlaceholder getHeartHealthPlaceholder() {
-            return heartHealthPlaceholder;
-        }
-
         public @NotNull TServerPlaceholder[] getMemberPlaceholders() {
             return memberPlaceholders.clone();
         }
@@ -362,24 +327,24 @@ public enum TServerPlaceholder {
     // Helper methods for creating suppliers
     //
 
-    private static @NotNull Supplier<String> fromGame(@NotNull Function<GameSession, String> fn) {
-        return () -> fn.apply(TheTowers.getInstance().getGame());
+    private static @NotNull Supplier<String> fromGame(@NotNull Function<GameManager, String> fn) {
+        return () -> fn.apply(TheTowers.getInstance().getGameManager());
     }
 
     private static @NotNull Supplier<String> fromMap(@NotNull Function<GameMap, String> fn) {
-        return () -> fn.apply(TheTowers.getInstance().getGame().getMap());
+        return () -> fn.apply(TheTowers.getInstance().getGameManager().getMap());
     }
 
     private static @NotNull Supplier<String> fromTeam(@NotNull GameTeam.Color color, @NotNull Function<GameTeam, String> fn) {
         return () -> {
-            GameTeam team = TheTowers.getInstance().getGame().getTeam(color);
+            GameTeam team = TheTowers.getInstance().getGameManager().getTeam(color);
             return team != null ? fn.apply(team) : "";
         };
     }
 
     private static @NotNull Supplier<String> getNTeamMember(@NotNull GameTeam.Color color, int n) {
         return () -> {
-            GameSession game = TheTowers.getInstance().getGame();
+            GameManager game = TheTowers.getInstance().getGameManager();
             GameTeam team = game.getTeam(color);
             if (team == null || team.getMembers().size() < n) {
                 return "";

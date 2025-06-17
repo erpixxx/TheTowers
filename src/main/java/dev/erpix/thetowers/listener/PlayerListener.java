@@ -1,7 +1,7 @@
 package dev.erpix.thetowers.listener;
 
 import dev.erpix.thetowers.TheTowers;
-import dev.erpix.thetowers.model.game.GameSession;
+import dev.erpix.thetowers.model.game.GameManager;
 import dev.erpix.thetowers.model.game.GamePlayer;
 import dev.erpix.thetowers.model.game.GameTeam;
 import dev.erpix.thetowers.util.Components;
@@ -42,15 +42,15 @@ public class PlayerListener implements Listener {
 
         GameTeam team = gamePlayer.getTeam();
         if (team == null) {
-            theTowers.getGame().addSpectator(gamePlayer);
+            theTowers.getGameManager().addSpectator(gamePlayer);
         }
 
-        GameSession game = theTowers.getGame();
-        GameSession.Stage stage = game.getStage();
-        if (stage == GameSession.Stage.LOBBY) {
+        GameManager game = theTowers.getGameManager();
+        GameManager.Stage stage = game.getStage();
+        if (stage == GameManager.Stage.LOBBY) {
             player.teleport(theTowers.getSpawnLocation());
         }
-        else if (stage == GameSession.Stage.WAITING) {
+        else if (stage == GameManager.Stage.WAITING) {
             player.teleport(game.getMap().getWaitingRoomLocation());
         } else {
             if (team != null) {

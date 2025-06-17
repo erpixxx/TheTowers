@@ -4,9 +4,9 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.erpix.thetowers.TheTowers;
+import dev.erpix.thetowers.model.game.GameManager;
 import dev.erpix.thetowers.model.game.GameMap;
 import dev.erpix.thetowers.model.game.GamePlayer;
-import dev.erpix.thetowers.model.game.GameSession;
 import dev.erpix.thetowers.model.game.GameTeam;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -50,7 +50,7 @@ public class GameCommand implements CommandBase {
                                         return Command.SINGLE_SUCCESS;
                                     }
 
-                                    theTowers.getGame().setMap(map);
+                                    theTowers.getGameManager().setMap(map);
                                     sender.sendRichMessage("<green>Ustawiono mapę na <gray>" + map.getName());
 
                                     return Command.SINGLE_SUCCESS;
@@ -61,7 +61,7 @@ public class GameCommand implements CommandBase {
                         .executes(ctx -> {
                             CommandSender sender = ctx.getSource().getSender();
 
-                            GameSession game = theTowers.getGame();
+                            GameManager game = theTowers.getGameManager();
                             game.start();
 
                             return Command.SINGLE_SUCCESS;
@@ -71,7 +71,7 @@ public class GameCommand implements CommandBase {
                         .executes(ctx -> {
                             CommandSender sender = ctx.getSource().getSender();
 
-                            GameSession game = theTowers.getGame();
+                            GameManager game = theTowers.getGameManager();
 
                             sender.sendRichMessage("Status gry: " + game.getStage());
                             sender.sendRichMessage("Mapa: " + game.getMap().getName());
@@ -102,9 +102,9 @@ public class GameCommand implements CommandBase {
                 .then(Commands.literal("stop")
                         .executes(ctx -> {
                             CommandSender sender = ctx.getSource().getSender();
-                            GameSession game = theTowers.getGame();
+                            GameManager game = theTowers.getGameManager();
 
-                            if (game.getStage() != GameSession.Stage.IN_PROGRESS) {
+                            if (game.getStage() != GameManager.Stage.IN_PROGRESS) {
                                 sender.sendRichMessage("<red>Nie ma aktywnej gry do zatrzymania.");
                                 return Command.SINGLE_SUCCESS;
                             }
@@ -120,9 +120,9 @@ public class GameCommand implements CommandBase {
 
     private int gameStart(CommandSender sender, boolean force) {
 
-        GameSession game = theTowers.getGame();
-        GameSession.Stage stage = game.getStage();
-        if (stage != GameSession.Stage.LOBBY) {
+        GameManager game = theTowers.getGameManager();
+        GameManager.Stage stage = game.getStage();
+        if (stage != GameManager.Stage.LOBBY) {
             sender.sendRichMessage("<red>Gra nie jest w stanie lobby, nie można jej rozpocząć.");
             return 0;
         }

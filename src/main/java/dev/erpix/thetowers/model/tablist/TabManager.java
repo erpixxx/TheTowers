@@ -1,11 +1,11 @@
 package dev.erpix.thetowers.model.tablist;
 
 import dev.erpix.thetowers.TheTowers;
+import dev.erpix.thetowers.model.game.GameManager;
 import dev.erpix.thetowers.model.game.GameMap;
 import dev.erpix.thetowers.model.game.GamePlayer;
-import dev.erpix.thetowers.model.game.GameSession;
 import dev.erpix.thetowers.model.game.GameTeam;
-import dev.erpix.thetowers.model.manager.PlayerManager;
+import dev.erpix.thetowers.model.PlayerManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
@@ -91,7 +91,7 @@ public class TabManager {
         return lobby;
     }
 
-    private @NotNull Layout createGameLayout(@NotNull GameSession game) {
+    private @NotNull Layout createGameLayout(@NotNull GameManager game) {
         LayoutManager lm = getLayoutManagerOrThrow();
         Layout layout = lm.createNewLayout("in-game");
 
@@ -136,10 +136,10 @@ public class TabManager {
 
         LayoutManager lm = getLayoutManagerOrThrow();
 
-        GameSession game = theTowers.getGame();
+        GameManager game = theTowers.getGameManager();
         switch (game.getStage()) {
             case LOBBY:
-                Layout layout = tPlayer.get().isInTeam() ? teamLobbyLayout : lobbyLayout;
+                Layout layout = tPlayer.get().isInAnyTeam() ? teamLobbyLayout : lobbyLayout;
                 System.out.println("Updating layout for player: " + playerName + " Layout: " + layout.getName());
                 lm.sendLayout(tabPlayer, layout);
                 break;

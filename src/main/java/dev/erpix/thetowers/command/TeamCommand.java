@@ -4,8 +4,8 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.erpix.thetowers.TheTowers;
+import dev.erpix.thetowers.model.game.GameManager;
 import dev.erpix.thetowers.model.game.GamePlayer;
-import dev.erpix.thetowers.model.game.GameSession;
 import dev.erpix.thetowers.model.game.GameTeam;
 import dev.erpix.thetowers.util.Disguises;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -26,7 +26,7 @@ public class TeamCommand implements CommandBase {
 
     @Override
     public LiteralCommandNode<CommandSourceStack> create() {
-        GameSession game = theTowers.getGame();
+        GameManager game = theTowers.getGameManager();
         return Commands.literal("team")
                 .executes(ctx -> {
                     CommandSender sender = ctx.getSource().getSender();
@@ -78,7 +78,7 @@ public class TeamCommand implements CommandBase {
                                                 return Command.SINGLE_SUCCESS;
                                             }
 
-                                            if (game.getStage() == GameSession.Stage.WAITING || game.getStage() == GameSession.Stage.IN_PROGRESS) {
+                                            if (game.getStage() == GameManager.Stage.WAITING || game.getStage() == GameManager.Stage.IN_PROGRESS) {
                                                 sender.sendRichMessage("<red>Nie można utworzyć drużyny, ponieważ gra już trwa.");
                                                 return Command.SINGLE_SUCCESS;
                                             }

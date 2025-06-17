@@ -27,6 +27,8 @@ dependencies {
     compileOnly("com.github.NEZNAMY:TAB-API:5.2.0")
     compileOnly("me.libraryaddict.disguises:libsdisguises:11.0.0")
     compileOnly("com.github.retrooper:packetevents-spigot:2.8.0")
+    compileOnly("org.projectlombok:lombok:1.18.38")
+    annotationProcessor("org.projectlombok:lombok:1.18.38")
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")

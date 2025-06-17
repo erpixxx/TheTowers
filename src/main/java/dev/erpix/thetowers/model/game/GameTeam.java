@@ -2,6 +2,9 @@ package dev.erpix.thetowers.model.game;
 
 import dev.erpix.thetowers.TheTowers;
 import dev.erpix.thetowers.util.Disguises;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
@@ -14,27 +17,40 @@ import java.util.*;
  */
 public class GameTeam {
 
-    private final TheTowers theTowers = TheTowers.getInstance();
-
     private final Map<String, GamePlayer> members = new LinkedHashMap<>();
+    @NonNull @Getter @Setter
     private String tag;
+    @NonNull @Getter @Setter
     private GamePlayer leader;
+    @NonNull @Getter @Setter
     private Color color;
+    @Setter @Getter
     private int heartHealth;
+    @Setter @Getter
     private int souls;
 
     public GameTeam(@NotNull GamePlayer leader, @NotNull String tag, @NotNull Color color) {
         this.leader = leader;
         this.tag = tag;
         this.color = color;
-        this.heartHealth = 100; // The default heart health is 100, but
+        this.heartHealth = 100; // can be adjusted later.
         addMember(leader);
     }
 
     /**
-     * Returns a collection of all team members.
+     * Retrieves a member of the team by their name.
      *
-     * @return Collection of all team members.
+     * @param name the name of the player to retrieve.
+     * @return the {@link GamePlayer} if found, otherwise null.
+     */
+    public @Nullable GamePlayer getMember(@NotNull String name) {
+        return members.get(name);
+    }
+
+    /**
+     * Retrieves all members of the team.
+     *
+     * @return an unmodifiable collection of all team members.
      */
     public @NotNull @Unmodifiable Collection<GamePlayer> getMembers() {
         return Collections.unmodifiableCollection(members.values());
@@ -43,20 +59,22 @@ public class GameTeam {
     /**
      * Adds a player to the team and updates their status to a team member.
      *
-     * @param player The {@link GamePlayer} to be added to the team.
+     * @param player the player to add to the team.
      */
     public void addMember(@NotNull GamePlayer player) {
         members.put(player.getName(), player);
         player.setTeam(this);
         player.getBukkitPlayer().ifPresent(Disguises::refresh);
-        theTowers.getGame().removeSpectator(player);
+
+        TheTowers theTowers = TheTowers.getInstance();
+        theTowers.getGameManager().removeSpectator(player);
         theTowers.getTabManager().updateLayout(player.getName());
     }
 
     /**
-     * Checks if a player is a member of the team.
+     * Checks if the team has a specific player as a member.
      *
-     * @param player The {@link GamePlayer} to check.
+     * @param player the player to check.
      * @return true if the player is a member of the team, false otherwise.
      */
     public boolean hasMember(@NotNull GamePlayer player) {
@@ -66,75 +84,41 @@ public class GameTeam {
     /**
      * Removes a player from the team and updates their status to spectator.
      *
-     * @param player The {@link GamePlayer} to remove from the team.
+     * @param player the player to remove from the team.
      */
     public void removeMember(@NotNull GamePlayer player) {
         members.remove(player.getName());
         player.setTeam(null);
         player.getBukkitPlayer().ifPresent(Disguises::refresh);
-        theTowers.getGame().addSpectator(player);
+
+        TheTowers theTowers = TheTowers.getInstance();
+        theTowers.getGameManager().addSpectator(player);
         theTowers.getTabManager().updateLayout(player.getName());
     }
 
     /**
-     * Gets the leader of the team.
+     * Retrieves the display name of the team, formatted with color and tag.
      *
-     * @return The leader of the team.
-     */
-    public @NotNull GamePlayer getLeader() {
-        return leader;
-    }
-
-    /**
-     * Gets the display name of the team, formatted with color and tag.
-     *
-     * @return The formatted display name of the team.
+     * @return the formatted display name of the team.
      */
     public @NotNull String getDisplayName() {
         return String.format("<color:#%s>[%s]</color>", color.getColorHex(), tag);
     }
 
     /**
-     * Gets the tag of the team.
+     * Damages the heart by 1.
      *
-     * @return The tag of the team.
-     */
-    public @NotNull String getTag() {
-        return tag;
-    }
-
-    /**
-     * Gets the color of the team.
-     *
-     * @return The color of the team.
-     */
-    public @NotNull Color getColor() {
-        return color;
-    }
-
-    /**
-     * Sets the color of the team.
-     *
-     * @param color The new color of the team.
-     */
-    public void setColor(@NotNull Color color) {
-        this.color = color;
-    }
-
-    /**
-     * Damages the heart health of the team by 1.
-     *
-     * @return The new heart health value after applying the damage.
+     * @return the remaining heart health after damage.
      */
     public int damageHeart() {
         return damageHeart(1);
     }
 
     /**
-     * Damages the heart health of the team by a specified amount.
+     * Damages the heart by a specified amount.
      *
-     * @param amount The amount of damage to apply to the heart health.
-     * @return The new heart health value after applying the damage.
+     * @param amount the amount of damage to apply to the heart.
+     * @return the remaining heart health after damage.
      */
     public int damageHeart(int amount) {
         if (heartHealth > 0) {
@@ -144,36 +128,19 @@ public class GameTeam {
     }
 
     /**
-     * Gets the current heart health of the team.
-     *
-     * @return The current heart health value.
-     */
-    public int getHeartHealth() {
-        return heartHealth;
-    }
-
-    /**
-     * Sets the heart health of the team.
-     *
-     * @param heartHealth The new heart health value.
-     */
-    public void setHeartHealth(int heartHealth) {
-        this.heartHealth = heartHealth;
-    }
-
-    /**
-     * Checks if the team is currently alive.
+     * Checks if the team is still alive based on heart health and member status.
      *
      * @return true if the team is alive, false otherwise.
      */
     public boolean isAlive() {
-        return heartHealth > 0;
+        return heartHealth > 0 && members.values().stream()
+                .noneMatch(player -> !player.isAlive() || !player.isOnline());
     }
 
     /**
      * Adds souls to the team's total.
      *
-     * @param value The number of souls to add.
+     * @param value the amount of souls to add.
      */
     public void addSouls(@Range(from = 0, to = Integer.MAX_VALUE) int value) {
         souls += value;
@@ -182,33 +149,16 @@ public class GameTeam {
     /**
      * Removes souls from the team's total, ensuring it does not go below zero.
      *
-     * @param value The number of souls to remove.
+     * @param value the amount of souls to remove.
      */
-    public void removeSoul(@Range(from = 0, to = Integer.MAX_VALUE) int value) {
+    public void removeSouls(@Range(from = 0, to = Integer.MAX_VALUE) int value) {
         souls = Math.max(0, souls - value);
-    }
-
-    /**
-     * Gets the number of souls collected by the team.
-     *
-     * @return The number of souls.
-     */
-    public int getSouls() {
-        return souls;
-    }
-
-    /**
-     * Sets the number of souls collected by the team.
-     *
-     * @param souls The new number of souls.
-     */
-    public void setSouls(int souls) {
-        this.souls = souls;
     }
 
     /**
      * Represents the color of a team.
      */
+    @Getter
     public enum Color {
         RED("red", "CC3933", "FE6C67"),
         BLUE("blue", "0094FF", "66BFFF"),
@@ -217,48 +167,18 @@ public class GameTeam {
         ORANGE("orange", "E56F19", "F0A875"),
         PURPLE("purple", "C126D9", "E093EC");
 
-        private final String name;
-        private final String colorHex;
-        private final String secondaryColorHex;
+        @NotNull private final String name;
+        @NotNull private final String colorHex;
+        @NotNull private final String secondaryColorHex;
 
-        Color(String name, String colorHex, String secondaryColorHex) {
+        Color(@NotNull String name, @NotNull String colorHex, @NotNull String secondaryColorHex) {
             this.name = name;
             this.colorHex = colorHex;
             this.secondaryColorHex = secondaryColorHex;
         }
 
         /**
-         * Gets the name of the color.
-         *
-         * @return The name of the color.
-         */
-        public @NotNull String getName() {
-            return name;
-        }
-
-        /**
-         * Gets the primary color hex code as a string.
-         *
-         * @return The hex code of the primary color.
-         */
-        public @NotNull String getColorHex() {
-            return colorHex;
-        }
-
-        /**
-         * Gets the secondary color hex code as a string.
-         *
-         * @return The hex code of the secondary color.
-         */
-        public @NotNull String getSecondaryColorHex() {
-            return secondaryColorHex;
-        }
-
-        /**
          * Returns a {@link Color} enum instance based on the provided name.
-         *
-         * @param name The name of the color to find.
-         * @return The Color enum instance if found, otherwise null.
          */
         public static @Nullable Color from(String name) {
             for (Color color : values()) {

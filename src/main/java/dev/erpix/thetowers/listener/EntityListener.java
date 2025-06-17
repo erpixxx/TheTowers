@@ -4,8 +4,8 @@ import dev.erpix.thetowers.Key;
 import dev.erpix.thetowers.TheTowers;
 import dev.erpix.thetowers.model.*;
 import dev.erpix.thetowers.model.game.GamePlayer;
-import dev.erpix.thetowers.model.game.GameSession;
-import dev.erpix.thetowers.model.manager.PlayerManager;
+import dev.erpix.thetowers.model.game.GameManager;
+import dev.erpix.thetowers.model.PlayerManager;
 import dev.erpix.thetowers.util.Disguises;
 import dev.erpix.thetowers.util.MathUtil;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -55,7 +55,7 @@ public class EntityListener implements Listener {
     public void onDamageByEntity(EntityDamageByEntityEvent event) {
         if (event.isCancelled()) return;
 
-        GameSession game = theTowers.getGame();
+        GameManager game = theTowers.getGameManager();
         PlayerManager playerManager = theTowers.getPlayerManager();
         Entity damager = event.getDamager();
         Entity entity = event.getEntity();

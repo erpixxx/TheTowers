@@ -1,5 +1,6 @@
 package dev.erpix.thetowers.model.game;
 
+import lombok.Getter;
 import org.bukkit.GameRule;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -15,11 +16,15 @@ import java.util.Map;
  */
 public class GameMap {
 
+    @NotNull @Getter
     private final String name;
+    @NotNull @Getter
     private final TeamSetup teamSetup;
+    @NotNull @Getter
     private final Location waitingRoomLocation;
     private final Map<GameTeam.Color, Location> teamSpawnLocations;
     private final Map<GameTeam.Color, Location> teamHeartLocation;
+    @NotNull @Getter
     private final World world;
 
     public GameMap(@NotNull String name,
@@ -38,75 +43,45 @@ public class GameMap {
     }
 
     /**
-     * Gets the name of the map.
+     * Retrieves the spawn location for a specific team by its color.
      *
-     * @return the name of the map
+     * @param color the color of the team.
+     * @return the {@link Location} of the team's spawn, or null if not set.
      */
-    public @NotNull String getName() {
-        return name;
-    }
-
-    /**
-     * Gets the team setup of the map.
-     *
-     * @return the team setup of the map
-     */
-    public @NotNull TeamSetup getTeamSetup() {
-        return teamSetup;
-    }
-
-    /**
-     * Gets the location of the waiting room for the map.
-     *
-     * @return the waiting room location
-     */
-    public @NotNull Location getWaitingRoomLocation() {
-        return waitingRoomLocation;
-    }
-
-    /**
-     * Gets the spawn locations for each team in the map.
-     *
-     * @return a map of team colors to their respective spawn locations
-     */
-    public @NotNull @Unmodifiable Map<GameTeam.Color, Location> getTeamSpawnLocations() {
-        return Collections.unmodifiableMap(teamSpawnLocations);
-    }
-
     public @Nullable Location getTeamSpawnLocation(GameTeam.Color color) {
         return teamSpawnLocations.get(color);
     }
 
     /**
-     * Gets the heart locations for each team in the map.
+     * Retrieves an unmodifiable map of team spawn locations.
      *
-     * @return a map of team colors to their respective heart locations
+     * @return a map of team colors to their respective spawn locations.
      */
-    public @NotNull @Unmodifiable Map<GameTeam.Color, Location> getTeamHeartLocations() {
-        return Collections.unmodifiableMap(teamHeartLocation);
+    public @NotNull @Unmodifiable Map<GameTeam.Color, Location> getTeamSpawnLocations() {
+        return Collections.unmodifiableMap(teamSpawnLocations);
     }
 
     /**
-     * Gets the heart location for a specific team color.
+     * Retrieves the heart location for a specific team by its color.
      *
-     * @param color the color of the team
-     * @return the heart location for the specified team color, or null if not found
+     * @param color the color of the team.
+     * @return the {@link Location} of the team's heart, or null if not set.
      */
     public @Nullable Location getTeamHeartLocation(GameTeam.Color color) {
         return teamHeartLocation.get(color);
     }
 
     /**
-     * Gets the world of the map.
+     * Retrieves an unmodifiable map of team heart locations.
      *
-     * @return the world of the map.
+     * @return a map of team colors to their respective heart locations.
      */
-    public @NotNull World getWorld() {
-        return world;
+    public @NotNull @Unmodifiable Map<GameTeam.Color, Location> getTeamHeartLocations() {
+        return Collections.unmodifiableMap(teamHeartLocation);
     }
 
     /**
-     * Applies the game rules standard game rules for the map world.
+     * Applies standard game rules to the world associated with this map.
      */
     private void applyGameRules() {
         world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
@@ -130,6 +105,7 @@ public class GameMap {
     /**
      * Represents the available setup of teams in the game.
      */
+    @Getter
     public enum TeamSetup {
         TWO_TEAMS(2),
         FOUR_TEAMS(4),
@@ -141,30 +117,7 @@ public class GameMap {
             this.teamCount = teamCount;
         }
 
-        /**
-         * Gets the number of teams in this setup.
-         *
-         * @return the number of teams
-         */
-        public int getTeamCount() {
-            return teamCount;
-        }
-
-        /**
-         * Gets the maximum number of players allowed in a team for this setup.
-         *
-         * @return the maximum number of players in a team.
-         */
-        public int getMaxPlayersInTeam() {
-            return getMaxPlayersInTeam(this);
-        }
-
-        /**
-         * Gets the formatted string representation of the team setup.
-         * For example, "8v8" for TWO_TEAMS, "4v4v4v4" for FOUR_TEAMS, etc.
-         *
-         * @return the formatted team setup string
-         */
+        // TODO
         public String getFormattedTeamSetup() {
             int teamCount = getTeamCount();
             int maxPlayersInTeam = getMaxPlayersInTeam(this);
@@ -172,10 +125,10 @@ public class GameMap {
         }
 
         /**
-         * Gets the TeamSetup based on the number of teams.
+         * Retrieves a {@link TeamSetup} instance based on the number of teams.
          *
-         * @param teamCount the number of teams
-         * @return the corresponding TeamSetup, or null if no matching setup is found
+         * @param teamCount the number of teams.
+         * @return the corresponding {@link TeamSetup}, or null if no matching setup is found.
          */
         public static @Nullable TeamSetup from(int teamCount) {
             for (TeamSetup setup : values()) {
@@ -187,14 +140,14 @@ public class GameMap {
         }
 
         /**
-         * Static method to calculate maximum number of players allowed in a team for provided setup.
+         * Calculates the maximum number of players allowed in a team based on the total
+         * number of players and the team setup.
          *
-         * @param setup the team setup to calculate for.
-         * @return the maximum number of players in a team.
-         * @see TeamSetup#getFormattedTeamSetup()
+         * @param setup the {@link TeamSetup} to calculate for.
+         * @return the maximum number of players allowed in a team.
          */
         public static int getMaxPlayersInTeam(TeamSetup setup) {
-            return (int) Math.floor((double) GameSession.MAX_PLAYERS / setup.getTeamCount());
+            return (int) Math.floor((double) GameManager.MAX_PLAYERS / setup.getTeamCount());
         }
 
     }

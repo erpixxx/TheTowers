@@ -1,4 +1,4 @@
-package dev.erpix.thetowers.model.manager;
+package dev.erpix.thetowers.model;
 
 import dev.erpix.thetowers.model.game.GamePlayer;
 import org.bukkit.entity.Player;

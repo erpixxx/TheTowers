@@ -4,6 +4,8 @@ import dev.erpix.thetowers.TheTowers;
 import dev.erpix.thetowers.model.PlayerStat;
 import dev.erpix.thetowers.util.Components;
 import dev.erpix.thetowers.util.OrderedAttackerCache;
+import lombok.Getter;
+import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.title.Title;
@@ -21,37 +23,31 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Represents a game in The Towers.
+ * Entry point for game related operations.
  */
-public class GameSession {
+public class GameManager {
 
     public static final int MAX_PLAYERS = 32;
 
     private final Map<String, GameTeam> teams = new LinkedHashMap<>();
     private final Map<String, GamePlayer> spectators = new HashMap<>();
+    @Getter
     private GameMap map;
+    @Setter @Getter
     private int maxPlayersPerTeam;
+    @NotNull @Setter @Getter
     private Stage stage;
     private LocalDateTime startTime;
 
-    public GameSession() {
+    public GameManager() {
         this.stage = Stage.LOBBY;
     }
 
     /**
-     * Retrieves the current chosen map in the game.
-     *
-     * @return the current {@link GameMap} object representing the game's map.
-     */
-    public @NotNull GameMap getMap() {
-        return map;
-    }
-
-    /**
      * Sets the map for the game and updates the maximum players per team based on the map's team setup.
-     * Removes any teams that exceed the maximum allowed players per team.
+     * <p>Removes any teams that exceed the maximum allowed players per team.</p>
      *
-     * @param map the {@link GameMap} object representing the new map for the game.
+     * @param map the map to set.
      */
     public void setMap(@NotNull GameMap map) {
         this.map = map;
@@ -62,38 +58,20 @@ public class GameSession {
                 removeTeam(team);
             }
         }
-        // TODO: Update placeholder %tt_game_team_setup%, %tt_game_team_map%, %tt_game_teams_ready%, %tt_game_teams_count%
-    }
-
-    /**
-     * Retrieves the maximum number of players allowed per team.
-     *
-     * @return the maximum number of players allowed per team.
-     */
-    public int getMaxPlayersPerTeam() {
-        return maxPlayersPerTeam;
-    }
-
-    /**
-     * Sets the maximum number of players allowed per team.
-     *
-     * @param maxPlayersPerTeam the maximum number of players to set for each team.
-     */
-    public void setMaxPlayersPerTeam(int maxPlayersPerTeam) {
-        this.maxPlayersPerTeam = maxPlayersPerTeam;
+        // TODO: Update placeholders
     }
 
     /**
      * Adds a team to the game.
      *
-     * @param team the {@link GameTeam} object representing the team to add.
+     * @param team the {@link GameTeam} to add.
      */
     public void addTeam(@NotNull GameTeam team) {
         teams.put(team.getTag(), team);
     }
 
     /**
-     * Removes all teams from the game.
+     * Clears all teams.
      */
     public void clearTeams() {
         teams.values().forEach(this::removeTeam);
@@ -102,8 +80,8 @@ public class GameSession {
     /**
      * Retrieves a team by its tag.
      *
-     * @param tag the unique identifier of the team.
-     * @return the {@link GameTeam} object representing the team, or null if no team with the given tag exists.
+     * @param tag the tag of the team to retrieve.
+     * @return the {@link GameTeam} associated with the tag, or null if not found.
      */
     public @Nullable GameTeam getTeam(@NotNull String tag) {
         return teams.get(tag);
@@ -113,7 +91,7 @@ public class GameSession {
      * Retrieves a team by its color.
      *
      * @param color the color of the team to retrieve.
-     * @return the {@link GameTeam} object representing the team with the specified color, or null if no such team exists.
+     * @return the {@link GameTeam} associated with the color, or null if not found.
      */
     public @Nullable GameTeam getTeam(@NotNull GameTeam.Color color) {
         return teams.values().stream()
@@ -123,16 +101,16 @@ public class GameSession {
     }
 
     /**
-     * Retrieves a collection of all teams currently in the game.
+     * Retrieves all teams in the game.
      *
-     * @return a collection of teams in the game.
+     * @return an unmodifiable collection of all {@link GameTeam} instances.
      */
     public @NotNull @Unmodifiable Collection<GameTeam> getTeams() {
         return Collections.unmodifiableCollection(teams.values());
     }
 
     /**
-     * Removes a team from the game and converts its members to spectators.
+     * Removes a team from the game.
      *
      * @param team the {@link GameTeam} to remove.
      */
@@ -147,7 +125,7 @@ public class GameSession {
     }
 
     /**
-     * Adds a player to the spectators list.
+     * Adds a player to the game as a spectator.
      *
      * @param player the {@link GamePlayer} to add as a spectator.
      */
@@ -157,9 +135,9 @@ public class GameSession {
     }
 
     /**
-     * Removes a player from the spectators list.
+     * Removes a player from the spectators list and sets them as alive.
      *
-     * @param player the {@link GamePlayer} to remove from the spectators list.
+     * @param player the {@link GamePlayer} to remove from spectators.
      */
     public void removeSpectator(@NotNull GamePlayer player) {
         spectators.remove(player.getName());
@@ -167,30 +145,12 @@ public class GameSession {
     }
 
     /**
-     * Retrieves a collection of all spectators currently in the game.
+     * Retrieves all spectators in the game.
      *
-     * @return a collection of all spectators in the game.
+     * @return an unmodifiable collection of all {@link GamePlayer} instances who are spectators.
      */
     public @NotNull @Unmodifiable Collection<GamePlayer> getSpectators() {
         return spectators.values();
-    }
-
-    /**
-     * Retrieves the current stage of the game.
-     *
-     * @return the current {@link Stage} of the game.
-     */
-    public @NotNull Stage getStage() {
-        return stage;
-    }
-
-    /**
-     * Sets the current stage of the game.
-     *
-     * @param stage the {@link Stage} to set as the current stage of the game.
-     */
-    public void setStage(@NotNull Stage stage) {
-        this.stage = stage;
     }
 
     // TODO
@@ -219,19 +179,14 @@ public class GameSession {
         }
     }
 
-    /**
-     * Stops the game and resets the stage to LOBBY.
-     */
     // TODO
     public void stop() {
         stage = Stage.LOBBY;
     }
 
+    // TODO: Move it somewhere else
     /**
      * Handles the death of a player in the game.
-     *
-     * @param victim   the {@link GamePlayer} who died.
-     * @param attacker the {@link Entity} responsible for the death.
      */
     public void death(@NotNull GamePlayer victim, @NotNull Entity attacker) {
         Optional<Player> playerOpt = victim.getBukkitPlayer();
@@ -362,29 +317,12 @@ public class GameSession {
         }, 5 * Ticks.TICKS_PER_SECOND, Ticks.TICKS_PER_SECOND);
     }
 
-    /**
-     * Retrieves a player by their name.
-     *
-     * @param name the name of the player to retrieve.
-     * @return the {@link GamePlayer} object if found, or null if no player with the given name exists.
-     */
     public @Nullable GamePlayer getPlayer(@NotNull String name) {
         return teams.values().stream()
                 .flatMap(team -> team.getMembers().stream())
                 .filter(player -> player.getName().equals(name))
                 .findFirst()
                 .orElse(null);
-    }
-
-    /**
-     * Checks if a player is part of any team in the game.
-     *
-     * @param player the {@link GamePlayer} to check.
-     * @return true if the player is in a team, false otherwise.
-     */
-    public boolean isPlayerInGame(@NotNull GamePlayer player) {
-        return teams.values().stream()
-                .anyMatch(team -> team.hasMember(player));
     }
 
     /**
