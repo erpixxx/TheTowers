@@ -27,6 +27,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -39,13 +40,13 @@ public class TheTowers {
     @Getter
     private static TheTowers instance;
 
+    private final Map<String, GameMap> maps = new HashMap<>();
     @NotNull @Getter
     private final Plugin plugin;
     @NotNull @Getter
     private final LibsDisguises libsDisguises;
     @NotNull @Getter
     private final CommandRegistrar commandRegistrar;
-    private final Map<String, GameMap> maps = new HashMap<>();
     @Getter
     private Location spawnLocation;
     @Getter
@@ -228,6 +229,14 @@ public class TheTowers {
     private void registerListeners() {
         plugin.getServer().getPluginManager().registerEvents(new PlayerListener(), plugin);
         plugin.getServer().getPluginManager().registerEvents(new EntityListener(), plugin);
+    }
+
+    public @NotNull Optional<GameMap> getMap(@NotNull String name) {
+        return Optional.ofNullable(maps.get(name));
+    }
+
+    public @NotNull @Unmodifiable Collection<GameMap> getMaps() {
+        return Collections.unmodifiableCollection(maps.values());
     }
 
 }

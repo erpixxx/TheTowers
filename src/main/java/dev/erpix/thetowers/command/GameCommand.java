@@ -13,6 +13,7 @@ import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.command.CommandSender;
 
 import java.util.Collection;
+import java.util.Optional;
 
 /*
  *
@@ -43,15 +44,15 @@ public class GameCommand implements CommandBase {
                                     CommandSender sender = ctx.getSource().getSender();
 
                                     String mapName = StringArgumentType.getString(ctx, "map");
-                                    GameMap map = theTowers.getMap(mapName);
+                                    Optional<GameMap> map = theTowers.getMap(mapName);
 
-                                    if (map == null) {
+                                    if (map.isEmpty()) {
                                         sender.sendRichMessage("<red>Nie znaleziono mapy o nazwie " + mapName);
                                         return Command.SINGLE_SUCCESS;
                                     }
 
-                                    theTowers.getGameManager().setMap(map);
-                                    sender.sendRichMessage("<green>Ustawiono mapę na <gray>" + map.getName());
+                                    theTowers.getGameManager().setMap(map.get());
+                                    sender.sendRichMessage("<green>Ustawiono mapę na <gray>" + map.get().getName());
 
                                     return Command.SINGLE_SUCCESS;
                                 })

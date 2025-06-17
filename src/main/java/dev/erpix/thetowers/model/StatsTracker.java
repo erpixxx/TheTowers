@@ -1,7 +1,6 @@
 package dev.erpix.thetowers.model;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Range;
 
 import java.util.*;
 import java.util.function.Consumer;
