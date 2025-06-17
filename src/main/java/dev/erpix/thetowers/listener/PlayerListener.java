@@ -60,7 +60,9 @@ public class PlayerListener implements Listener {
             // It would be only for spectators who are not in a team
         }
 
+        // TODO: Move to the TAB's event bus
         theTowers.getTabManager().updateLayout(player.getName());
+
         Disguises.create(player);
     }
 

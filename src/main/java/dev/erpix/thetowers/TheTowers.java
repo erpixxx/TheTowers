@@ -5,6 +5,7 @@ import dev.erpix.thetowers.command.dev.SetNameCmd;
 import dev.erpix.thetowers.command.dev.ShowAttributesCmd;
 import dev.erpix.thetowers.listener.EntityListener;
 import dev.erpix.thetowers.listener.PlayerListener;
+import dev.erpix.thetowers.listener.TABHandler;
 import dev.erpix.thetowers.model.game.GameManager;
 import dev.erpix.thetowers.model.game.GameMap;
 import dev.erpix.thetowers.model.game.GameTeam;
@@ -77,9 +78,7 @@ public class TheTowers {
             plugin.getComponentLogger().error(Components.color("<red>TabAPI EventBus is not available."));
             return;
         }
-        eventBus.register(PlayerLoadEvent.class, event -> {
-            
-        });
+        eventBus.register(PlayerLoadEvent.class, TABHandler.ON_PLAYER_LOAD);
 
         plugin.saveDefaultConfig();
         FileConfiguration config = plugin.getConfig();
