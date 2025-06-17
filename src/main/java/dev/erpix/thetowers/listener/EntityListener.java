@@ -6,7 +6,7 @@ import dev.erpix.thetowers.model.*;
 import dev.erpix.thetowers.model.game.GamePlayer;
 import dev.erpix.thetowers.model.game.GameManager;
 import dev.erpix.thetowers.model.PlayerManager;
-import dev.erpix.thetowers.util.Disguises;
+import dev.erpix.thetowers.util.DisguiseHandler;
 import dev.erpix.thetowers.util.MathUtil;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import org.bukkit.Material;
@@ -175,7 +175,7 @@ public class EntityListener implements Listener {
     public void onRegen(EntityRegainHealthEvent event) {
         if (event.getEntity() instanceof Player player) {
             double hp = Math.min(MathUtil.round(player.getHealth() + event.getAmount(), 1), 20.0);
-            Disguises.refresh(player, hp);
+            DisguiseHandler.refresh(player, hp);
         }
     }
 

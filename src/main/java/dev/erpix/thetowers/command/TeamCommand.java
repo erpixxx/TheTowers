@@ -7,7 +7,7 @@ import dev.erpix.thetowers.TheTowers;
 import dev.erpix.thetowers.model.game.GameManager;
 import dev.erpix.thetowers.model.game.GamePlayer;
 import dev.erpix.thetowers.model.game.GameTeam;
-import dev.erpix.thetowers.util.Disguises;
+import dev.erpix.thetowers.util.DisguiseHandler;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.Bukkit;
@@ -148,7 +148,7 @@ public class TeamCommand implements CommandBase {
                             sender.sendRichMessage("<green>Drużyna <color:#" + team.getColor().getColorHex() + ">" + team.getDisplayName() + "</color> została rozwiązana.");
                             team.getMembers().forEach(member -> {
                                 member.setTeam(null);
-                                Disguises.refresh(Bukkit.getPlayer(member.getName()));
+                                DisguiseHandler.refresh(Bukkit.getPlayer(member.getName()));
                             });
 
                             return Command.SINGLE_SUCCESS;
@@ -229,7 +229,7 @@ public class TeamCommand implements CommandBase {
                             team.removeMember(gamePlayer);
                             gamePlayer.setTeam(null);
                             game.addSpectator(gamePlayer);
-                            Disguises.refresh(player);
+                            DisguiseHandler.refresh(player);
 
                             sender.sendRichMessage("<green>Opuszczono drużynę <color:#" + team.getColor().getColorHex() + ">" + team.getDisplayName() + "</color>.");
 
@@ -305,7 +305,7 @@ public class TeamCommand implements CommandBase {
                                     team.removeMember(member);
                                     member.setTeam(null);
                                     game.addSpectator(member);
-                                    Disguises.refresh(Bukkit.getPlayer(member.getName()));
+                                    DisguiseHandler.refresh(Bukkit.getPlayer(member.getName()));
 
                                     sender.sendRichMessage("<green>Usunięto gracza <color:#" + member.getTeam().getColor().getColorHex() + ">" + member.getName() + "</color> z drużyny <color:#" + team.getColor().getColorHex() + ">" + team.getDisplayName() + "</color>.");
 

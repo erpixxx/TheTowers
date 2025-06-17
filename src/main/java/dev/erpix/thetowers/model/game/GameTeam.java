@@ -1,7 +1,7 @@
 package dev.erpix.thetowers.model.game;
 
 import dev.erpix.thetowers.TheTowers;
-import dev.erpix.thetowers.util.Disguises;
+import dev.erpix.thetowers.util.DisguiseHandler;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -64,7 +64,7 @@ public class GameTeam {
     public void addMember(@NotNull GamePlayer player) {
         members.put(player.getName(), player);
         player.setTeam(this);
-        player.getBukkitPlayer().ifPresent(Disguises::refresh);
+        player.getBukkitPlayer().ifPresent(DisguiseHandler::refresh);
 
         TheTowers theTowers = TheTowers.getInstance();
         theTowers.getGameManager().removeSpectator(player);
@@ -89,7 +89,7 @@ public class GameTeam {
     public void removeMember(@NotNull GamePlayer player) {
         members.remove(player.getName());
         player.setTeam(null);
-        player.getBukkitPlayer().ifPresent(Disguises::refresh);
+        player.getBukkitPlayer().ifPresent(DisguiseHandler::refresh);
 
         TheTowers theTowers = TheTowers.getInstance();
         theTowers.getGameManager().addSpectator(player);

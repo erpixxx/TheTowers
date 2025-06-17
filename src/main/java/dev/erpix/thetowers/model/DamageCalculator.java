@@ -4,7 +4,7 @@ import dev.erpix.thetowers.TheTowers;
 import dev.erpix.thetowers.model.game.GameManager;
 import dev.erpix.thetowers.model.game.GamePlayer;
 import dev.erpix.thetowers.model.game.GameTeam;
-import dev.erpix.thetowers.util.Disguises;
+import dev.erpix.thetowers.util.DisguiseHandler;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import org.bukkit.*;
 import org.bukkit.entity.*;
@@ -93,7 +93,7 @@ public final class DamageCalculator {
 
         // If the target is an attacker, update their health and attacker information
         if (target instanceof Player targetPlayer) {
-            Disguises.refresh(targetPlayer);
+            DisguiseHandler.refresh(targetPlayer);
         }
     }
 

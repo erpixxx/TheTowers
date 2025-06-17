@@ -5,7 +5,7 @@ import dev.erpix.thetowers.model.game.GameManager;
 import dev.erpix.thetowers.model.game.GamePlayer;
 import dev.erpix.thetowers.model.game.GameTeam;
 import dev.erpix.thetowers.util.Components;
-import dev.erpix.thetowers.util.Disguises;
+import dev.erpix.thetowers.util.DisguiseHandler;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -22,13 +22,13 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
-        Disguises.create(player);
+        DisguiseHandler.create(player);
     }
 
     @EventHandler
     public void onSneak(PlayerToggleSneakEvent event) {
         Player player = event.getPlayer();
-        Disguises.toggleName(player);
+        DisguiseHandler.toggleName(player);
     }
 
     @EventHandler
@@ -62,7 +62,7 @@ public class PlayerListener implements Listener {
 
         theTowers.getTabManager().updateLayout(player.getName());
 
-        Disguises.create(player);
+        DisguiseHandler.create(player);
     }
 
     @EventHandler

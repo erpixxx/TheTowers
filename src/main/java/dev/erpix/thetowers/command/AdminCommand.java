@@ -11,7 +11,7 @@ import dev.erpix.thetowers.model.game.GameManager;
 import dev.erpix.thetowers.model.game.GamePlayer;
 import dev.erpix.thetowers.model.game.GameTeam;
 import dev.erpix.thetowers.util.Colors;
-import dev.erpix.thetowers.util.Items;
+import dev.erpix.thetowers.util.ItemGenerator;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.Bukkit;
@@ -51,7 +51,7 @@ public class AdminCommand implements CommandBase {
                 .requires(source -> source.getSender().hasPermission("thetowers.admin"))
                 .then(Commands.literal("item")
                         .then(Commands.argument("item_name", StringArgumentType.word())
-                                .suggests(SuggestionProviders.fromCollection(Items.ITEMS.keySet()))
+                                .suggests(SuggestionProviders.fromCollection(ItemGenerator.ITEMS.keySet()))
                                 .executes(ctx -> {
                                     CommandSender sender = ctx.getSource().getSender();
 
@@ -62,12 +62,12 @@ public class AdminCommand implements CommandBase {
 
                                     String itemName = ctx.getArgument("item_name", String.class);
 
-                                    if (!Items.ITEMS.containsKey(itemName)) {
+                                    if (!ItemGenerator.ITEMS.containsKey(itemName)) {
                                         sender.sendRichMessage("<red>Item '" + itemName + "' does not exist.");
                                         return Command.SINGLE_SUCCESS;
                                     }
 
-                                    player.getInventory().addItem(Items.ITEMS.get(itemName).get());
+                                    player.getInventory().addItem(ItemGenerator.ITEMS.get(itemName).get());
                                     sender.sendRichMessage("<green>Gave you item: <white>" + itemName);
 
                                     return Command.SINGLE_SUCCESS;
