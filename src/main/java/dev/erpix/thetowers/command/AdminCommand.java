@@ -3,7 +3,10 @@ package dev.erpix.thetowers.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.erpix.thetowers.TheTowers;
 import dev.erpix.thetowers.model.*;
@@ -238,6 +241,7 @@ public class AdminCommand implements CommandBase {
                                                 .executes(ctx -> profileStatReset(ctx.getSource().getSender(),
                                                         ctx.getArgument("player", String.class)))
                                                 .build())
+                                        .then(statsInfo().build())
                                         .build())
                                 .build())
                         .build())
@@ -247,6 +251,29 @@ public class AdminCommand implements CommandBase {
     @Override
     public List<String> aliases() {
         return List.of("thetowersadmin");
+    }
+
+    private LiteralArgumentBuilder<CommandSourceStack> statsInfo() {
+        return Commands.literal("info")
+                .executes(ctx -> {
+                    CommandSender sender = ctx.getSource().getSender();
+
+                    String playerName = ctx.getArgument("player", String.class);
+                    Optional<PlayerProfile> profile = TheTowers.getInstance().getProfileManager().getProfile(playerName);
+                    if (profile.isEmpty()) {
+                        sender.sendRichMessage("<red>Nie można znaleźć profilu dla gracza " + playerName);
+                        return Command.SINGLE_SUCCESS;
+                    }
+
+                    sender.sendRichMessage(Colors.format(Colors.PRIMARY) + "Statystyki gracza <white>" + playerName + "</white>:");
+                    PlayerTotalStat.values().forEach(stat -> {
+                        int value = profile.get().getStats().getStat(stat);
+                        String formattedStat = Colors.format(Colors.SECONDARY) + stat.getKey() + ": <white>" + value;
+                        sender.sendRichMessage(formattedStat);
+                    });
+
+                    return Command.SINGLE_SUCCESS;
+                });
     }
 
     private RequiredArgumentBuilder<CommandSourceStack, String> statArgument() {

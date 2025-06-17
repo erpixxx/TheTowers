@@ -125,7 +125,7 @@ public interface PlayerStat {
 
     final class Registry {
 
-        private static final Map<String, PlayerStat> REGISTRY = new HashMap<>();
+        private static final Map<String, PlayerStat> REGISTRY = new LinkedHashMap<>();
 
         private Registry() { }
 
