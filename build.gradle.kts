@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "dev.erpix.thetowers"
-version = "1.0.0"
+version = "0.0.0-dev"
 
 repositories {
     mavenCentral()
@@ -42,9 +42,7 @@ tasks.build {
     dependsOn(tasks.shadowJar)
 }
 
-tasks.jar {
-    enabled = false
-}
+tasks.jar { enabled = false }
 
 tasks.processResources {
     val props = mapOf("version" to version)
@@ -58,6 +56,9 @@ tasks.processResources {
 tasks.shadowJar {
     archiveBaseName.set("TheTowers")
     archiveClassifier.set("")
+
+    // Temp
+    destinationDirectory.set(file("D:/Serwery/dev/FemboyowoWD/plugins"))
 }
 
 tasks.test {
