@@ -1,6 +1,7 @@
 package dev.erpix.thetowers.model;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import dev.erpix.thetowers.TheTowers;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +22,9 @@ public class ProfileManager {
 
     private final Path profilesDir = TheTowers.getInstance().getPlugin().getDataPath().resolve("profiles");
     private final Map<String, PlayerProfile> profiles = new HashMap<>();
-    private final Gson gson = new Gson();
+    private final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(PlayerStat.class, new PlayerStat.Adapter())
+            .create();
 
     /**
      * Initializes the profile manager.

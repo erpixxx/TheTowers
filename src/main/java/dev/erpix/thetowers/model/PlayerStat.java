@@ -1,9 +1,11 @@
 package dev.erpix.thetowers.model;
 
+import com.google.gson.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
+import java.lang.reflect.Type;
 import java.util.*;
 
 /**
@@ -98,6 +100,25 @@ public interface PlayerStat {
         @Override
         public String toString() {
             return key;
+        }
+
+    }
+
+    class Adapter implements JsonSerializer<PlayerStat>, JsonDeserializer<PlayerStat> {
+
+        @Override
+        public PlayerStat deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            String key = json.getAsString();
+            PlayerStat stat = PlayerStat.Registry.fromKey(key);
+            if (stat == null) {
+                throw new JsonParseException("Unknown PlayerStat key: " + key);
+            }
+            return stat;
+        }
+
+        @Override
+        public JsonElement serialize(PlayerStat src, Type typeOfSrc, JsonSerializationContext context) {
+            return new JsonPrimitive(src.getKey());
         }
 
     }

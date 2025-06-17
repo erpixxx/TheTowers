@@ -194,6 +194,7 @@ public class TheTowers {
         registerCommands();
 
         profileManager = new ProfileManager();
+        profileManager.init();
         playerManager = new PlayerManager();
         Bukkit.getOnlinePlayers().forEach(player -> {
             this.playerManager.addPlayer(player);
