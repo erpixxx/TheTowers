@@ -24,6 +24,8 @@ import java.util.function.Supplier;
 @SuppressWarnings("UnstableApiUsage")
 public final class ItemGenerator {
 
+    private ItemGenerator() { }
+
     /**
      * A map of item names to their corresponding item stack suppliers.
      */
