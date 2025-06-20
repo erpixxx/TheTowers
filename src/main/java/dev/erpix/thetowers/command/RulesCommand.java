@@ -6,6 +6,7 @@ import dev.erpix.thetowers.util.Colors;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ import java.util.List;
 public class RulesCommand implements CommandBase {
 
     @Override
-    public LiteralCommandNode<CommandSourceStack> create() {
+    public @NotNull LiteralCommandNode<CommandSourceStack> create() {
         return Commands.literal("rules")
                 .executes(ctx -> {
                     CommandSender sender = ctx.getSource().getSender();
@@ -32,7 +33,7 @@ public class RulesCommand implements CommandBase {
     }
 
     @Override
-    public List<String> aliases() {
+    public @NotNull List<String> aliases() {
         return List.of("regulamin");
     }
 }

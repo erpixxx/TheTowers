@@ -11,6 +11,7 @@ import dev.erpix.thetowers.model.game.GameTeam;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -30,7 +31,7 @@ public class GameCommand implements CommandBase {
     private final TheTowers theTowers = TheTowers.getInstance();
 
     @Override
-    public LiteralCommandNode<CommandSourceStack> create() {
+    public @NotNull LiteralCommandNode<CommandSourceStack> create() {
         return Commands.literal("game")
                 .then(Commands.literal("map")
                         .then(Commands.argument("map", StringArgumentType.word())

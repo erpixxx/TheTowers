@@ -9,6 +9,7 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +18,7 @@ import java.util.Optional;
 public class ProfileCommand implements CommandBase {
 
     @Override
-    public LiteralCommandNode<CommandSourceStack> create() {
+    public @NotNull LiteralCommandNode<CommandSourceStack> create() {
         return Commands.literal("profile")
                 .executes(ctx -> {
                     CommandSender sender = ctx.getSource().getSender();
@@ -48,7 +49,7 @@ public class ProfileCommand implements CommandBase {
     }
 
     @Override
-    public List<String> aliases() {
+    public @NotNull List<String> aliases() {
         return List.of("profil");
     }
 

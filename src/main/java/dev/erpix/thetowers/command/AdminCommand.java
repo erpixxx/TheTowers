@@ -20,6 +20,7 @@ import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,7 +50,7 @@ public class AdminCommand implements CommandBase {
      * Will change it later (probably)
      */
     @Override
-    public LiteralCommandNode<CommandSourceStack> create() {
+    public @NotNull LiteralCommandNode<CommandSourceStack> create() {
         return Commands.literal("ttadmin")
                 .requires(source -> source.getSender().hasPermission("thetowers.admin"))
                 .then(Commands.literal("item")
@@ -249,7 +250,7 @@ public class AdminCommand implements CommandBase {
     }
 
     @Override
-    public List<String> aliases() {
+    public @NotNull List<String> aliases() {
         return List.of("thetowersadmin");
     }
 

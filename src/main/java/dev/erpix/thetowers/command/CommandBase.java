@@ -2,6 +2,7 @@ package dev.erpix.thetowers.command;
 
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -17,14 +18,14 @@ public interface CommandBase {
      *
      * @return the command node.
      */
-    LiteralCommandNode<CommandSourceStack> create();
+    @NotNull LiteralCommandNode<CommandSourceStack> create();
 
     /**
      * Aliases for the command.
      *
      * @return a list of aliases.
      */
-    default List<String> aliases() {
+    default @NotNull List<String> aliases() {
         return Collections.emptyList();
     }
 

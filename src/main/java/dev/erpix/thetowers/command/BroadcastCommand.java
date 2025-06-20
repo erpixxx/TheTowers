@@ -7,6 +7,7 @@ import dev.erpix.thetowers.util.Components;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.Bukkit;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ import java.util.List;
 public class BroadcastCommand implements CommandBase {
 
     @Override
-    public LiteralCommandNode<CommandSourceStack> create() {
+    public @NotNull LiteralCommandNode<CommandSourceStack> create() {
         return Commands.literal("broadcast")
                 .requires(source -> source.getSender().isOp())
                 .then(Commands.argument("message", StringArgumentType.greedyString())
@@ -30,7 +31,7 @@ public class BroadcastCommand implements CommandBase {
     }
 
     @Override
-    public List<String> aliases() {
+    public @NotNull List<String> aliases() {
         return List.of("bc");
     }
 

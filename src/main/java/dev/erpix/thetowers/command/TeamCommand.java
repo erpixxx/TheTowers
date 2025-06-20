@@ -13,6 +13,7 @@ import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -25,7 +26,7 @@ public class TeamCommand implements CommandBase {
     private final TheTowers theTowers = TheTowers.getInstance();
 
     @Override
-    public LiteralCommandNode<CommandSourceStack> create() {
+    public @NotNull LiteralCommandNode<CommandSourceStack> create() {
         GameManager game = theTowers.getGameManager();
         return Commands.literal("team")
                 .executes(ctx -> {
