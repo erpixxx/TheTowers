@@ -1,6 +1,6 @@
 package dev.erpix.thetowers.listener;
 
-import dev.erpix.thetowers.Key;
+import dev.erpix.thetowers.AttributeKey;
 import dev.erpix.thetowers.TheTowers;
 import dev.erpix.thetowers.model.*;
 import dev.erpix.thetowers.model.game.GamePlayer;
@@ -92,7 +92,7 @@ public class EntityListener implements Listener {
                 return;
             }
             PersistentDataContainer arrowData = arrow.getPersistentDataContainer();
-            Double projDamage = arrowData.get(Key.PROJECTILE_DAMAGE.key(), PersistentDataType.DOUBLE);
+            Double projDamage = arrowData.get(AttributeKey.PROJECTILE_DAMAGE.key(), PersistentDataType.DOUBLE);
             if (projDamage == null) {
                 event.setCancelled(true);
                 return;
@@ -187,7 +187,7 @@ public class EntityListener implements Listener {
         }
 
         PersistentDataContainerView bowData = bow.getPersistentDataContainer();
-        Double damage = bowData.get(Key.PROJECTILE_DAMAGE.key(), PersistentDataType.DOUBLE);
+        Double damage = bowData.get(AttributeKey.PROJECTILE_DAMAGE.key(), PersistentDataType.DOUBLE);
         if (damage == null) {
             event.setCancelled(true);
             return;
@@ -198,7 +198,7 @@ public class EntityListener implements Listener {
 
         Entity projectile = event.getProjectile();
         PersistentDataContainer data = projectile.getPersistentDataContainer();
-        data.set(Key.PROJECTILE_DAMAGE.key(), PersistentDataType.DOUBLE, damage);
+        data.set(AttributeKey.PROJECTILE_DAMAGE.key(), PersistentDataType.DOUBLE, damage);
     }
 
 }
