@@ -1,6 +1,6 @@
 package dev.erpix.thetowers.util;
 
-import dev.erpix.thetowers.Key;
+import dev.erpix.thetowers.AttributeKey;
 import dev.erpix.thetowers.TheTowers;
 import dev.erpix.thetowers.model.game.GameTeam;
 import net.kyori.adventure.text.Component;
@@ -175,7 +175,7 @@ public final class ItemGenerator {
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         });
         item.editPersistentDataContainer(data ->
-                data.set(Key.PROJECTILE_DAMAGE.key(), PersistentDataType.DOUBLE, 3.0));
+                data.set(AttributeKey.PROJECTILE_DAMAGE.key(), PersistentDataType.DOUBLE, 3.0));
         return item;
     }
 
@@ -187,7 +187,7 @@ public final class ItemGenerator {
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         });
         item.editPersistentDataContainer(data ->
-                data.set(Key.PROJECTILE_DAMAGE.key(), PersistentDataType.DOUBLE, 3.0));
+                data.set(AttributeKey.PROJECTILE_DAMAGE.key(), PersistentDataType.DOUBLE, 3.0));
         return item;
     }
 
