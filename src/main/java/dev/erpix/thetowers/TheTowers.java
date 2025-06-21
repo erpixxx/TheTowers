@@ -73,7 +73,7 @@ public class TheTowers {
     public void enable() {
         EventBus eventBus = TabAPI.getInstance().getEventBus();
         if (eventBus == null) {
-            plugin.getComponentLogger().error(Components.color("<red>TabAPI EventBus is not available."));
+            plugin.getComponentLogger().error(Components.color("<red>TabAPI Event Bus is not available."));
             return;
         }
         eventBus.register(PlayerLoadEvent.class, TABHandler.ON_PLAYER_LOAD);
@@ -88,8 +88,8 @@ public class TheTowers {
         double lobbyX = lobbySection.getDouble("x");
         double lobbyY = lobbySection.getDouble("y");
         double lobbyZ = lobbySection.getDouble("z");
-        double lobbyPitch = lobbySection.getDouble("pitch");
         double lobbyYaw = lobbySection.getDouble("yaw");
+        double lobbyPitch = lobbySection.getDouble("pitch");
         String lobbyWorldName = lobbySection.getString("world");
         World lobbyWorld = lobbyWorldName != null ? Bukkit.getWorld(lobbyWorldName) : null;
         if (lobbyWorld == null) {
@@ -152,11 +152,20 @@ public class TheTowers {
                 double teamSpawnX = singleTeamSection.getDouble("spawn.x");
                 double teamSpawnY = singleTeamSection.getDouble("spawn.y");
                 double teamSpawnZ = singleTeamSection.getDouble("spawn.z");
-                double teamSpawnPitch = singleTeamSection.getDouble("spawn.pitch");
                 double teamSpawnYaw = singleTeamSection.getDouble("spawn.yaw");
+                double teamSpawnPitch = singleTeamSection.getDouble("spawn.pitch");
                 Location spawnLocation = new Location(world, teamSpawnX, teamSpawnY, teamSpawnZ, (float) teamSpawnYaw, (float) teamSpawnPitch);
                 spawnLocations.put(team, spawnLocation);
             }
+            ConfigurationSection supplyCrateSection = singleMapSection.getConfigurationSection("supply_crate");
+            if (supplyCrateSection == null) {
+                logger.error(Components.color("<red>'supply_crate' section is missing for map '" + map + "'!"));
+                continue;
+            }
+            double supplyCrateX = supplyCrateSection.getDouble("x");
+            double supplyCrateY = supplyCrateSection.getDouble("y");
+            double supplyCrateZ = supplyCrateSection.getDouble("z");
+            Location supplyCrateLocation = new Location(world, supplyCrateX, supplyCrateY, supplyCrateZ);
             ConfigurationSection waitingRoomSection = singleMapSection.getConfigurationSection("waiting_room");
             if (waitingRoomSection == null) {
                 logger.error(Components.color("<red>'waiting_room' section is missing for map '" + map + "'!"));
@@ -165,12 +174,12 @@ public class TheTowers {
             double waitingRoomX = waitingRoomSection.getDouble("x");
             double waitingRoomY = waitingRoomSection.getDouble("y");
             double waitingRoomZ = waitingRoomSection.getDouble("z");
-            double waitingRoomPitch = waitingRoomSection.getDouble("pitch");
             double waitingRoomYaw = waitingRoomSection.getDouble("yaw");
+            double waitingRoomPitch = waitingRoomSection.getDouble("pitch");
 
             Location waitingRoomLocation = new Location(world, waitingRoomX, waitingRoomY, waitingRoomZ, (float) waitingRoomYaw, (float) waitingRoomPitch);
 
-            GameMap gameMap = new GameMap(map, teamSetup, waitingRoomLocation, spawnLocations, heartLocations, world);
+            GameMap gameMap = new GameMap(map, teamSetup, supplyCrateLocation, waitingRoomLocation, spawnLocations, heartLocations, world);
             this.maps.put(map, gameMap);
         }
         if (this.maps.isEmpty()) {

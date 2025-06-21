@@ -21,6 +21,8 @@ public class GameMap {
     @NotNull @Getter
     private final TeamSetup teamSetup;
     @NotNull @Getter
+    private final Location supplyCrateLocation;
+    @NotNull @Getter
     private final Location waitingRoomLocation;
     private final Map<GameTeam.Color, Location> teamSpawnLocations;
     private final Map<GameTeam.Color, Location> teamHeartLocation;
@@ -29,12 +31,14 @@ public class GameMap {
 
     public GameMap(@NotNull String name,
                    @NotNull TeamSetup teamSetup,
+                   @NotNull Location supplyCrateLocation,
                    @NotNull Location waitingRoomLocation,
                    @NotNull Map<GameTeam.Color, Location> teamSpawnLocations,
                    @NotNull Map<GameTeam.Color, Location> teamHeartLocation,
                    @NotNull World world) {
         this.name = name;
         this.teamSetup = teamSetup;
+        this.supplyCrateLocation = supplyCrateLocation;
         this.waitingRoomLocation = waitingRoomLocation;
         this.teamSpawnLocations = teamSpawnLocations;
         this.teamHeartLocation = teamHeartLocation;
