@@ -1,5 +1,4 @@
-layout-refresh-interval: 800 # in milliseconds
-spawn:
+lobby:
   x: 0.5
   y: 0.0
   z: 0.5

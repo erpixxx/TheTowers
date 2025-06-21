@@ -47,7 +47,7 @@ public class TheTowers {
     @NotNull @Getter
     private final CommandRegistrar commandRegistrar;
     @Getter
-    private Location spawnLocation;
+    private Location lobbyLocation;
     @Getter
     private PlayerManager playerManager;
     @Getter
@@ -80,23 +80,23 @@ public class TheTowers {
 
         plugin.saveDefaultConfig();
         FileConfiguration config = plugin.getConfig();
-        ConfigurationSection spawnSection = config.getConfigurationSection("spawn");
-        if (spawnSection == null) {
-            logger.error(Components.color("<red>'spawn' section is missing in the config.yml!"));
+        ConfigurationSection lobbySection = config.getConfigurationSection("lobby");
+        if (lobbySection == null) {
+            logger.error(Components.color("<red>'lobby' section is missing in the config.yml!"));
             return;
         }
-        double spawnX = spawnSection.getDouble("x");
-        double spawnY = spawnSection.getDouble("y");
-        double spawnZ = spawnSection.getDouble("z");
-        double spawnPitch = spawnSection.getDouble("pitch");
-        double spawnYaw = spawnSection.getDouble("yaw");
-        String spawnWorldName = spawnSection.getString("world");
-        World spawnWorld = spawnWorldName != null ? Bukkit.getWorld(spawnWorldName) : null;
-        if (spawnWorld == null) {
-            logger.error(Components.color("<red>Cannot find world '" + spawnWorldName + "' for spawn location!"));
+        double lobbyX = lobbySection.getDouble("x");
+        double lobbyY = lobbySection.getDouble("y");
+        double lobbyZ = lobbySection.getDouble("z");
+        double lobbyPitch = lobbySection.getDouble("pitch");
+        double lobbyYaw = lobbySection.getDouble("yaw");
+        String lobbyWorldName = lobbySection.getString("world");
+        World lobbyWorld = lobbyWorldName != null ? Bukkit.getWorld(lobbyWorldName) : null;
+        if (lobbyWorld == null) {
+            logger.error(Components.color("<red>Cannot find world '" + lobbyWorldName + "' for lobby location!"));
             return;
         }
-        this.spawnLocation = new Location(spawnWorld, spawnX, spawnY, spawnZ, (float) spawnYaw, (float) spawnPitch);
+        this.lobbyLocation = new Location(lobbyWorld, lobbyX, lobbyY, lobbyZ, (float) lobbyYaw, (float) lobbyPitch);
 
         ConfigurationSection mapsSection = config.getConfigurationSection("maps");
         if (mapsSection == null) {
