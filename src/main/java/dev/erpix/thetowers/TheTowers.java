@@ -1,8 +1,6 @@
 package dev.erpix.thetowers;
 
 import dev.erpix.thetowers.command.*;
-import dev.erpix.thetowers.command.dev.SetNameCmd;
-import dev.erpix.thetowers.command.dev.ShowAttributesCmd;
 import dev.erpix.thetowers.listener.EntityListener;
 import dev.erpix.thetowers.listener.PlayerListener;
 import dev.erpix.thetowers.listener.TABHandler;
@@ -219,10 +217,7 @@ public class TheTowers {
                 new TeamCommand(),
                 new HelpCommand(),
                 new ProfileCommand(),
-                new RulesCommand(),
-
-                new SetNameCmd(),
-                new ShowAttributesCmd()
+                new RulesCommand()
         );
     }
 
