@@ -94,7 +94,7 @@ public class GamePlayer {
         String leaderIndicator = team.getLeader() == this ? " <yellow>👑</yellow>" : "";
         if (includeTag) {
             return String.format("<color:#%s>[%s]</color> <color:#%s>%s</color>%s",
-                    team.getColor().getColorHex(), team.getTag(),
+                    team.getColor().getColorHex(), team.getName(),
                     team.getColor().getSecondaryColorHex(), name, leaderIndicator);
         } else {
             return String.format("<color:#%s>%s</color>%s",

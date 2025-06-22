@@ -93,7 +93,7 @@ public class TeamCommand implements CommandBase {
                                             }
 
                                             Optional<GameTeam> sameTag = game.getTeams().stream()
-                                                    .filter(team -> team.getTag().equalsIgnoreCase(tag))
+                                                    .filter(team -> team.getName().equalsIgnoreCase(tag))
                                                     .findFirst();
                                             if (sameTag.isPresent()) {
                                                 sender.sendRichMessage("<red>Drużyna o tagu " + tag + " już istnieje.");
@@ -167,7 +167,7 @@ public class TeamCommand implements CommandBase {
 
                                     String tag = ctx.getArgument("tag", String.class);
                                     Optional<GameTeam> optTeam = game.getTeams().stream()
-                                            .filter(team -> team.getTag().equalsIgnoreCase(tag))
+                                            .filter(team -> team.getName().equalsIgnoreCase(tag))
                                             .findFirst();
 
                                     if (optTeam.isEmpty()) {

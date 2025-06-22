@@ -95,7 +95,7 @@ public final class DisguiseHandler {
             return new String[] { gamePlayer.getDisplayNameNoTag() };
         }
 
-        String line1 = String.format("<#%s>[%s]", team.getColor().getColorHex(), team.getTag());
+        String line1 = String.format("<#%s>[%s]", team.getColor().getColorHex(), team.getName());
         String line2 = String.format("%s", gamePlayer.getDisplayNameNoTag());
         String line3 = String.format("<red>%s <dark_red>❤", hp);
 
