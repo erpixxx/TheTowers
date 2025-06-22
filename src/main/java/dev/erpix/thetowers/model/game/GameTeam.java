@@ -17,9 +17,12 @@ import java.util.*;
  */
 public class GameTeam {
 
+    public static final int TEAM_MAX_NAME_LENGTH = 5;
+    public static final int TEAM_MIN_NAME_LENGTH = 2;
+
     private final Map<String, GamePlayer> members = new LinkedHashMap<>();
-    @NonNull @Getter @Setter
-    private String tag;
+    @NonNull @Getter
+    private String name;
     @NonNull @Getter @Setter
     private GamePlayer leader;
     @NonNull @Getter @Setter
@@ -29,12 +32,49 @@ public class GameTeam {
     @Setter @Getter
     private int souls;
 
-    public GameTeam(@NotNull GamePlayer leader, @NotNull String tag, @NotNull Color color) {
+    /**
+     * Creates a new team.
+     *
+     * @param leader the leader of the team, must not be null.
+     * @param name the name of the team, must be valid.
+     * @param color the color of the team, must not be null.
+     * @throws IllegalArgumentException if the name is invalid.
+     * @see #isValidName(String)
+     */
+    public GameTeam(@NotNull GamePlayer leader, @NotNull String name, @NotNull Color color) {
+        if (!isValidName(name)) {
+            throw new IllegalArgumentException("Invalid team name: " + name);
+        }
         this.leader = leader;
-        this.tag = tag;
+        this.name = name;
         this.color = color;
         this.heartHealth = 100; // can be adjusted later.
         addMember(leader);
+    }
+
+    /**
+     * Validates if the provided team name is valid.
+     *
+     * @param name the name to validate.
+     * @return true if the name is valid, false otherwise.
+     */
+    public static boolean isValidName(@NotNull String name) {
+        return name.length() >= TEAM_MIN_NAME_LENGTH && name.length() <= TEAM_MAX_NAME_LENGTH
+                && name.chars().allMatch(Character::isLetterOrDigit);
+    }
+
+    /**
+     * Sets the name of the team.
+     *
+     * @param name the new name for the team.
+     * @throws IllegalArgumentException if the name is invalid.
+     * @see #isValidName(String)
+     */
+    public void setName(@NonNull String name) {
+        if (!isValidName(name)) {
+            throw new IllegalArgumentException("Invalid team name: " + name);
+        }
+        this.name = name;
     }
 
     /**
@@ -102,7 +142,7 @@ public class GameTeam {
      * @return the formatted display name of the team.
      */
     public @NotNull String getDisplayName() {
-        return String.format("<color:#%s>[%s]</color>", color.getColorHex(), tag);
+        return String.format("<color:#%s>[%s]</color>", color.getColorHex(), name);
     }
 
     /**
@@ -194,19 +234,19 @@ public class GameTeam {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         GameTeam gameTeam = (GameTeam) o;
-        return Objects.equals(members, gameTeam.members) && Objects.equals(leader, gameTeam.leader) && Objects.equals(tag, gameTeam.tag) && color == gameTeam.color;
+        return Objects.equals(members, gameTeam.members) && Objects.equals(leader, gameTeam.leader) && Objects.equals(name, gameTeam.name) && color == gameTeam.color;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(members, leader, tag, color);
+        return Objects.hash(members, leader, name, color);
     }
 
     @Override
     public String toString() {
         return "TTeam{" +
                 "color=" + color +
-                ", tag='" + tag + '\'' +
+                ", tag='" + name + '\'' +
                 ", leader=" + leader +
                 ", members=" + members +
                 '}';
