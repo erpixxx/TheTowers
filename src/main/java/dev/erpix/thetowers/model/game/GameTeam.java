@@ -27,9 +27,9 @@ public class GameTeam {
     private GamePlayer leader;
     @NonNull @Getter @Setter
     private Color color;
-    @Setter @Getter
+    @Getter @Setter
     private int heartHealth;
-    @Setter @Getter
+    @Getter @Setter
     private int souls;
 
     /**
