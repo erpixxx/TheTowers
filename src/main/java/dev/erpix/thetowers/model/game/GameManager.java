@@ -67,7 +67,7 @@ public class GameManager {
      * @param team the {@link GameTeam} to add.
      */
     public void addTeam(@NotNull GameTeam team) {
-        teams.put(team.getTag(), team);
+        teams.put(team.getName(), team);
     }
 
     /**
@@ -78,13 +78,13 @@ public class GameManager {
     }
 
     /**
-     * Retrieves a team by its tag.
+     * Retrieves a team by name.
      *
-     * @param tag the tag of the team to retrieve.
-     * @return the {@link GameTeam} associated with the tag, or null if not found.
+     * @param name the name of the team to retrieve.
+     * @return the {@link GameTeam} associated with the name, or empty if not found.
      */
-    public @Nullable GameTeam getTeam(@NotNull String tag) {
-        return teams.get(tag);
+    public @NotNull Optional<GameTeam> getTeam(@NotNull String name) {
+        return Optional.ofNullable(teams.get(name));
     }
 
     /**
@@ -115,7 +115,7 @@ public class GameManager {
      * @param team the {@link GameTeam} to remove.
      */
     public void removeTeam(@NotNull GameTeam team) {
-        teams.remove(team.getTag());
+        teams.remove(team.getName());
         Collection<GamePlayer> members = team.getMembers();
         members.forEach(member -> {
             member.sendMessage("<gray>Twoja drużyna została usunięta.");
