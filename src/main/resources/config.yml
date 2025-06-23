@@ -1,3 +1,5 @@
+base_heart_health: 100
+tower_heart_material: RED_GLAZED_TERRACOTTA
 lobby:
   x: 0.5
   y: 0.0

@@ -1,12 +1,13 @@
 package dev.erpix.thetowers;
 
 import dev.erpix.thetowers.command.*;
+import dev.erpix.thetowers.config.Config;
+import dev.erpix.thetowers.config.ConfigLoader;
 import dev.erpix.thetowers.listener.EntityListener;
 import dev.erpix.thetowers.listener.PlayerListener;
 import dev.erpix.thetowers.listener.TABHandler;
 import dev.erpix.thetowers.model.game.GameManager;
 import dev.erpix.thetowers.model.game.GameMap;
-import dev.erpix.thetowers.model.game.GameTeam;
 import dev.erpix.thetowers.model.PlayerManager;
 import dev.erpix.thetowers.model.ProfileManager;
 import dev.erpix.thetowers.model.tablist.TabManager;
@@ -21,15 +22,11 @@ import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
-import org.bukkit.World;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class TheTowers {
 
@@ -46,6 +43,8 @@ public class TheTowers {
     private final LibsDisguises libsDisguises;
     @NotNull @Getter
     private final CommandRegistrar commandRegistrar;
+    @NotNull @Getter
+    private final Config config;
     @Getter
     private Location lobbyLocation;
     @Getter
@@ -64,6 +63,8 @@ public class TheTowers {
         this.commandRegistrar = new CommandRegistrar(plugin.getLifecycleManager());
         this.logger = plugin.getComponentLogger();
         instance = this;
+
+        this.config = ConfigLoader.load(plugin);
     }
 
     public static @NotNull NamespacedKey key(@NotNull String key) {
@@ -78,118 +79,13 @@ public class TheTowers {
         }
         eventBus.register(PlayerLoadEvent.class, TABHandler.ON_PLAYER_LOAD);
 
-        plugin.saveDefaultConfig();
-        FileConfiguration config = plugin.getConfig();
-        ConfigurationSection lobbySection = config.getConfigurationSection("lobby");
-        if (lobbySection == null) {
-            logger.error(Components.color("<red>'lobby' section is missing in the config.yml!"));
-            return;
-        }
-        double lobbyX = lobbySection.getDouble("x");
-        double lobbyY = lobbySection.getDouble("y");
-        double lobbyZ = lobbySection.getDouble("z");
-        double lobbyYaw = lobbySection.getDouble("yaw");
-        double lobbyPitch = lobbySection.getDouble("pitch");
-        String lobbyWorldName = lobbySection.getString("world");
-        World lobbyWorld = lobbyWorldName != null ? Bukkit.getWorld(lobbyWorldName) : null;
-        if (lobbyWorld == null) {
-            logger.error(Components.color("<red>Cannot find world '" + lobbyWorldName + "' for lobby location!"));
-            return;
-        }
-        this.lobbyLocation = new Location(lobbyWorld, lobbyX, lobbyY, lobbyZ, (float) lobbyYaw, (float) lobbyPitch);
+        config.getMaps().forEach((name, map) -> {
+            GameMap converted = map.convert();
+            this.maps.put(name, converted);
+        });
+        logger.info(Components.color("<green>Maps: " + String.join(", ", this.maps.keySet())));
 
-        ConfigurationSection mapsSection = config.getConfigurationSection("maps");
-        if (mapsSection == null) {
-            logger.error(Components.color("<red>'maps' section is missing in the config.yml!"));
-            return;
-        }
-        Set<String> maps = mapsSection.getKeys(false);
-        for (String map : maps) {
-
-            ConfigurationSection singleMapSection = mapsSection.getConfigurationSection(map);
-            if (singleMapSection == null) {
-                logger.error(Components.color("<red>Map configuration for '" + map + "' is missing!"));
-                continue;
-            }
-
-            String worldName = singleMapSection.getString("world");
-            if (worldName == null) {
-                logger.error(Components.color("<red>'world' is missing for map '" + map + "'!"));
-                continue;
-            }
-            World world = Bukkit.getWorld(worldName);
-            if (world == null) {
-                logger.error(Components.color("<red>World '" + worldName + "' for map '" + map + "' does not exist!"));
-                continue;
-            }
-
-            ConfigurationSection teamsSection = singleMapSection.getConfigurationSection("teams");
-            if (teamsSection == null) {
-                logger.error(Components.color("<red>'teams' section is missing for map '" + map + "'!"));
-                continue;
-            }
-
-            Set<GameTeam.Color> teams = teamsSection.getKeys(false).stream().map(
-                    t -> GameTeam.Color.valueOf(t.toUpperCase(Locale.ROOT))).collect(Collectors.toSet());
-            GameMap.TeamSetup teamSetup = GameMap.TeamSetup.from(teams.size());
-            if (teamSetup == null) {
-                logger.error(Components.color("<red>Invalid team setup for map '" + map + "'!"));
-                continue;
-            }
-            Map<GameTeam.Color, Location> heartLocations = new EnumMap<>(GameTeam.Color.class);
-            Map<GameTeam.Color, Location> spawnLocations = new EnumMap<>(GameTeam.Color.class);
-            for (var team : teams) {
-                ConfigurationSection singleTeamSection = teamsSection.getConfigurationSection(team.toString());
-                if (singleTeamSection == null) {
-                    logger.error(Components.color("<red>Team configuration for '" + team + "' is missing in map '" + map + "'!"));
-                    continue;
-                }
-                int heartX = singleTeamSection.getInt("heart.x");
-                int heartY = singleTeamSection.getInt("heart.y");
-                int heartZ = singleTeamSection.getInt("heart.z");
-                Location heartLocation = new Location(world, heartX, heartY, heartZ);
-                heartLocations.put(team, heartLocation);
-                double teamSpawnX = singleTeamSection.getDouble("spawn.x");
-                double teamSpawnY = singleTeamSection.getDouble("spawn.y");
-                double teamSpawnZ = singleTeamSection.getDouble("spawn.z");
-                double teamSpawnYaw = singleTeamSection.getDouble("spawn.yaw");
-                double teamSpawnPitch = singleTeamSection.getDouble("spawn.pitch");
-                Location spawnLocation = new Location(world, teamSpawnX, teamSpawnY, teamSpawnZ, (float) teamSpawnYaw, (float) teamSpawnPitch);
-                spawnLocations.put(team, spawnLocation);
-            }
-            ConfigurationSection supplyCrateSection = singleMapSection.getConfigurationSection("supply_crate");
-            if (supplyCrateSection == null) {
-                logger.error(Components.color("<red>'supply_crate' section is missing for map '" + map + "'!"));
-                continue;
-            }
-            double supplyCrateX = supplyCrateSection.getDouble("x");
-            double supplyCrateY = supplyCrateSection.getDouble("y");
-            double supplyCrateZ = supplyCrateSection.getDouble("z");
-            Location supplyCrateLocation = new Location(world, supplyCrateX, supplyCrateY, supplyCrateZ);
-            ConfigurationSection waitingRoomSection = singleMapSection.getConfigurationSection("waiting_room");
-            if (waitingRoomSection == null) {
-                logger.error(Components.color("<red>'waiting_room' section is missing for map '" + map + "'!"));
-                continue;
-            }
-            double waitingRoomX = waitingRoomSection.getDouble("x");
-            double waitingRoomY = waitingRoomSection.getDouble("y");
-            double waitingRoomZ = waitingRoomSection.getDouble("z");
-            double waitingRoomYaw = waitingRoomSection.getDouble("yaw");
-            double waitingRoomPitch = waitingRoomSection.getDouble("pitch");
-
-            Location waitingRoomLocation = new Location(world, waitingRoomX, waitingRoomY, waitingRoomZ, (float) waitingRoomYaw, (float) waitingRoomPitch);
-
-            GameMap gameMap = new GameMap(map, teamSetup, supplyCrateLocation, waitingRoomLocation, spawnLocations, heartLocations, world);
-            this.maps.put(map, gameMap);
-        }
-        if (this.maps.isEmpty()) {
-            logger.error(Components.color("<red>No valid maps found in the configuration!"));
-        } else {
-            logger.info(Components.color("<green>Loaded " + this.maps.size() + " map(s) successfully."));
-            logger.info("Maps: {}", this.maps.keySet().stream()
-                    .map(m -> m + " (" + this.maps.get(m).getTeamSetup().getTeamCount() + " teams)")
-                    .collect(Collectors.joining(", ")));
-        }
+        this.lobbyLocation = config.getLobby().convert();
 
         gameManager = new GameManager();
         this.maps.values().stream().findFirst().ifPresent(tMap -> {

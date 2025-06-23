@@ -48,7 +48,7 @@ public class PlayerListener implements Listener {
         GameManager game = theTowers.getGameManager();
         GameManager.Stage stage = game.getStage();
         if (stage == GameManager.Stage.LOBBY) {
-            player.teleport(theTowers.getSpawnLocation());
+            player.teleport(theTowers.getLobbyLocation());
         }
         else if (stage == GameManager.Stage.WAITING) {
             player.teleport(game.getMap().getWaitingRoomLocation());
@@ -87,6 +87,12 @@ public class PlayerListener implements Listener {
             Bukkit.getOnlinePlayers().forEach(p -> p.sendMessage(result));
             Bukkit.getConsoleSender().sendMessage(result);
         });
+    }
+
+    @EventHandler
+    public void onInteract(PlayerInteractEvent event) {
+        GameManager gm = TheTowers.getInstance().getGameManager();
+        // TODO
     }
 
     private Component joinMessage(Player player) {
