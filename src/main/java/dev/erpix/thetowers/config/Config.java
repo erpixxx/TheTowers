@@ -40,32 +40,32 @@ public class Config {
 
     @Getter @Setter @ToString
     public static class MapEntry {
-        private String name, world;
+        private String world;
         private Map<String, Team> teams;
         private SupplyCrate supplyCrate;
         private WaitingRoom waitingRoom;
 
-        public GameMap convert() {
+        public GameMap convert(String name) {
             World bukkitWorld = Bukkit.getWorld(world);
             if (bukkitWorld == null) {
                 throw new IllegalArgumentException("World '" + world + "' not found.");
             }
             var setup = GameMap.TeamSetup.from(teams.size());
             if (setup == null) {
-                throw new IllegalArgumentException("Invalid team setup for map '" + name + "'.");
+                throw new IllegalArgumentException("Invalid team setup for map: " + name);
             }
             Location supplyCrateLocation = new Location(bukkitWorld, supplyCrate.getX(), supplyCrate.getY(), supplyCrate.getZ());
             Location waitingRoomLocation = new Location(bukkitWorld, waitingRoom.getX(), waitingRoom.getY(), waitingRoom.getZ(),
                     (float) waitingRoom.getYaw(), (float) waitingRoom.getPitch());
             HashMap<GameTeam.Color, Location> teamSpawnLocations = new HashMap<>();
             HashMap<GameTeam.Color, Location> teamHeartLocations = new HashMap<>();
-            teams.forEach((name, team) -> {
+            teams.forEach((teamName, team) -> {
                 var spawn = team.getSpawn();
                 Location spawnLocation = new Location(bukkitWorld, spawn.getX(), spawn.getY(), spawn.getZ(),
                         (float) spawn.getYaw(), (float) spawn.getPitch());
                 var heart = team.getHeart();
                 Location heartLocation = new Location(bukkitWorld, heart.getX(), heart.getY(), heart.getZ());
-                GameTeam.Color color = GameTeam.Color.from(name);
+                GameTeam.Color color = GameTeam.Color.from(teamName);
 
                 teamSpawnLocations.put(color, spawnLocation);
                 teamHeartLocations.put(color, heartLocation);

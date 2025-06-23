@@ -80,7 +80,7 @@ public class TheTowers {
         eventBus.register(PlayerLoadEvent.class, TABHandler.ON_PLAYER_LOAD);
 
         config.getMaps().forEach((name, map) -> {
-            GameMap converted = map.convert();
+            GameMap converted = map.convert(name);
             this.maps.put(name, converted);
         });
         logger.info(Components.color("<green>Maps: " + String.join(", ", this.maps.keySet())));
