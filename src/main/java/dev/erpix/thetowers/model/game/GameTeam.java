@@ -74,7 +74,11 @@ public class GameTeam {
         if (!isValidName(name)) {
             throw new IllegalArgumentException("Invalid team name: " + name);
         }
+        TheTowers.getInstance().getGameManager().updateTeamName(this, name);
         this.name = name;
+        for (GamePlayer member : members.values()) {
+            member.getBukkitPlayer().ifPresent(DisguiseHandler::refresh);
+        }
     }
 
     /**

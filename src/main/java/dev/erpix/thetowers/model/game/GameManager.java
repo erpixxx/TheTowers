@@ -33,9 +33,9 @@ public class GameManager {
     private final Map<String, GamePlayer> spectators = new HashMap<>();
     @Getter
     private GameMap map;
-    @Setter @Getter
+    @Getter @Setter
     private int maxPlayersPerTeam;
-    @NotNull @Setter @Getter
+    @NotNull @Getter @Setter
     private Stage stage;
     private LocalDateTime startTime;
 
@@ -68,6 +68,21 @@ public class GameManager {
      */
     public void addTeam(@NotNull GameTeam team) {
         teams.put(team.getName(), team);
+    }
+
+    /**
+     * Updates the name of an existing team in teams map.
+     *
+     * @param team the {@link GameTeam} to update.
+     * @param newName the new name for the team.
+     * @throws IllegalArgumentException if a team with the new name already exists.
+     */
+    public void updateTeamName(@NotNull GameTeam team, @NotNull String newName) {
+        if (teams.containsKey(newName)) {
+            throw new IllegalArgumentException("Team with name '" + newName + "' already exists.");
+        }
+        teams.remove(team.getName());
+        teams.put(newName, team);
     }
 
     /**
