@@ -62,7 +62,7 @@ public interface PlayerStat {
      *
      * @return an unmodifiable collection of all player statistics.
      */
-    static @NotNull @Unmodifiable Collection<PlayerStat> values() {
+    static @NotNull @Unmodifiable Collection<PlayerStat> stats() {
         return Registry.getAll();
     }
 

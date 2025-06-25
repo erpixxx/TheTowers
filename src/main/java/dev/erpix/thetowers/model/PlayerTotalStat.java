@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -26,12 +27,23 @@ public interface PlayerTotalStat extends PlayerStat {
     }
 
     /**
-     * Returns all registered {@link PlayerStat} instances.
+     * Returns all registered {@link PlayerTotalStat} instances.
      *
      * @return an unmodifiable collection of all player statistics.
      */
-    static @NotNull @Unmodifiable Collection<PlayerStat> values() {
+    static @NotNull @Unmodifiable Collection<PlayerStat> totalStats() {
         return Registry.getAll();
+    }
+
+    /**
+     * Returns all registered {@link PlayerStat} instances including {@link PlayerTotalStat}.
+     *
+     * @return an unmodifiable collection of all player statistics.
+     */
+    static @NotNull @Unmodifiable Collection<PlayerStat> stats() {
+        ArrayList<PlayerStat> merged = new ArrayList<>(totalStats());
+        merged.addAll(PlayerStat.stats());
+        return merged;
     }
 
 }
