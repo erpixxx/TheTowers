@@ -4,6 +4,7 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -25,16 +26,35 @@ public class ConfigLoader {
      * @throws ConfigLoadException if the configuration file cannot be loaded.
      */
     public static @NotNull Config load(@NotNull Plugin plugin) {
-        Path dataPath = plugin.getDataPath();
-        if (!Files.exists(dataPath)) {
-            plugin.saveDefaultConfig();
-        }
-        Path configPath = dataPath.resolve(CONFIG_FILE_NAME);
-
         try {
-            return YamlLoader.load(configPath, Config.class);
-        } catch (IOException e) {
-            throw new ConfigLoadException("Failed to load configuration file.", e);
+            Path dataPath = plugin.getDataPath();
+            if (!Files.exists(dataPath)) {
+                try {
+                    Files.createDirectories(dataPath);
+                } catch (IOException e) {
+                    throw new ConfigLoadException("Failed to create data directory.", e);
+                }
+            }
+
+            Path configPath = dataPath.resolve(CONFIG_FILE_NAME);
+            if (!Files.exists(configPath)) {
+                try (InputStream is = plugin.getResource(CONFIG_FILE_NAME)) {
+                    if (is == null) {
+                        throw new ConfigLoadException("Default configuration file not found in plugin resources.");
+                    }
+                    Files.copy(is, configPath);
+                } catch (IOException e) {
+                    throw new ConfigLoadException("Failed to create default configuration file.", e);
+                }
+            }
+
+            try {
+                return YamlLoader.load(configPath, Config.class);
+            } catch (IOException e) {
+                throw new ConfigLoadException("Failed to load configuration file.", e);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
