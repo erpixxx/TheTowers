@@ -1,5 +1,5 @@
-base_heart_health: 100
-tower_heart_material: RED_GLAZED_TERRACOTTA
+base-heart-health: 100
+tower-heart-material: RED_GLAZED_TERRACOTTA
 lobby:
   x: 0.5
   y: 0.0
@@ -32,11 +32,11 @@ maps:
           z: 0.0
           yaw: 0.0
           pitch: 0.0
-    supply_crate:
+    supply-crate:
       x: 0.0
       y: 0.0
       z: 0.0
-    waiting_room:
+    waiting-room:
       x: 0.0
       y: 0.0
       z: 0.0

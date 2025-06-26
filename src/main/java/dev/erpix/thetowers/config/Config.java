@@ -25,11 +25,10 @@ public class Config {
     private Map<String, MapEntry> maps;
 
     @Getter @Setter @ToString
-    public static class Lobby {
-        private double x, y, z, yaw, pitch;
+    public static class Lobby extends CoordinateWithYawPitch {
         private String world;
 
-        public Location convert() {
+        public Location toLocation() {
             World bukkitWorld = Bukkit.getWorld(world);
             if (bukkitWorld == null) {
                 throw new IllegalArgumentException("World '" + world + "' not found.");
@@ -42,10 +41,10 @@ public class Config {
     public static class MapEntry {
         private String world;
         private Map<String, Team> teams;
-        private SupplyCrate supplyCrate;
-        private WaitingRoom waitingRoom;
+        private Coordinate supplyCrate;
+        private CoordinateWithYawPitch waitingRoom;
 
-        public GameMap convert(String name) {
+        public GameMap toGameMap(String name) {
             World bukkitWorld = Bukkit.getWorld(world);
             if (bukkitWorld == null) {
                 throw new IllegalArgumentException("World '" + world + "' not found.");
@@ -76,28 +75,22 @@ public class Config {
 
         @Getter @Setter @ToString
         public static class Team {
-            private Heart heart;
-            private Spawn spawn;
-
-            @Getter @Setter @ToString
-            public static class Heart {
-                private double x, y, z;
-            }
-
-            @Getter @Setter @ToString
-            public static class Spawn {
-                private double x, y, z, yaw, pitch;
-            }
-        }
-
-        @Getter @Setter @ToString
-        public static class SupplyCrate {
-            private double x, y, z;
-        }
-
-        @Getter @Setter @ToString
-        public static class WaitingRoom {
-            private double x, y, z, yaw, pitch;
+            private Coordinate heart;
+            private CoordinateWithYawPitch spawn;
         }
     }
+
+    @Getter @Setter @ToString
+    public static class Coordinate {
+        protected double x;
+        protected double y;
+        protected double z;
+    }
+
+    @Getter @Setter @ToString
+    public static class CoordinateWithYawPitch extends Coordinate {
+        protected double yaw;
+        protected double pitch;
+    }
+
 }
