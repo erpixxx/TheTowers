@@ -2,6 +2,8 @@ package dev.erpix.thetowers.config.i18n;
 
 import dev.erpix.thetowers.TheTowers;
 import dev.erpix.thetowers.config.YamlLoader;
+import dev.erpix.thetowers.model.PlayerStat;
+import dev.erpix.thetowers.model.PlayerTotalStat;
 import dev.erpix.thetowers.util.Colors;
 import lombok.Getter;
 import lombok.Setter;
@@ -227,63 +229,63 @@ public final class Messages {
                 ""
         );
 
-        @Translatable("play_time")
+        @Translatable(PlayerStat.RegistryKey.PLAY_TIME)
         private String playTime = "Play time";
-        @Translatable("kills")
+        @Translatable(PlayerStat.RegistryKey.KILLS)
         private String kills = "Kills";
-        @Translatable("deaths")
+        @Translatable(PlayerStat.RegistryKey.DEATHS)
         private String deaths = "Deaths";
-        @Translatable("assists")
+        @Translatable(PlayerStat.RegistryKey.ASSISTS)
         private String assists = "Assists";
-        @Translatable("heart_damage")
+        @Translatable(PlayerStat.RegistryKey.HEART_DAMAGE)
         private String heartDamage = "Heart damage";
-        @Translatable("towers_destroyed")
+        @Translatable(PlayerStat.RegistryKey.TOWERS_DESTROYED)
         private String towersDestroyed = "Towers destroyed";
-        @Translatable("coal_mined")
+        @Translatable(PlayerStat.RegistryKey.COAL_MINED)
         private String coalMined = "Coal mined";
-        @Translatable("copper_mined")
+        @Translatable(PlayerStat.RegistryKey.COPPER_MINED)
         private String copperMined = "Copper mined";
-        @Translatable("iron_mined")
+        @Translatable(PlayerStat.RegistryKey.IRON_MINED)
         private String ironMined = "Iron mined";
-        @Translatable("gold_mined")
+        @Translatable(PlayerStat.RegistryKey.GOLD_MINED)
         private String goldMined = "Gold mined";
-        @Translatable("diamond_mined")
+        @Translatable(PlayerStat.RegistryKey.DIAMOND_MINED)
         private String diamondMined = "Diamond mined";
-        @Translatable("emerald_mined")
+        @Translatable(PlayerStat.RegistryKey.EMERALD_MINED)
         private String emeraldMined = "Emerald mined";
-        @Translatable("lapis_mined")
+        @Translatable(PlayerStat.RegistryKey.LAPIS_MINED)
         private String lapisMined = "Lapis mined";
-        @Translatable("amethyst_mined")
+        @Translatable(PlayerStat.RegistryKey.AMETHYST_MINED)
         private String amethystMined = "Amethyst mined";
-        @Translatable("quartz_mined")
+        @Translatable(PlayerStat.RegistryKey.QUARTZ_MINED)
         private String quartzMined = "Quartz mined";
-        @Translatable("netherite_mined")
+        @Translatable(PlayerStat.RegistryKey.NETHERITE_MINED)
         private String netheriteMined = "Netherite mined";
-        @Translatable("wood_gathered")
+        @Translatable(PlayerStat.RegistryKey.WOOD_GATHERED)
         private String woodGathered = "Wood gathered";
-        @Translatable("carrot_harvested")
+        @Translatable(PlayerStat.RegistryKey.CARROT_HARVESTED)
         private String carrotHarvested = "Carrot harvested";
-        @Translatable("melon_harvested")
+        @Translatable(PlayerStat.RegistryKey.MELON_HARVESTED)
         private String melonHarvested = "Melon harvested";
-        @Translatable("potato_harvested")
+        @Translatable(PlayerStat.RegistryKey.POTATO_HARVESTED)
         private String potatoHarvested = "Potato harvested";
-        @Translatable("wheat_harvested")
+        @Translatable(PlayerStat.RegistryKey.WHEAT_HARVESTED)
         private String wheatHarvested = "Wheat harvested";
-        @Translatable("fish_caught")
+        @Translatable(PlayerStat.RegistryKey.FISH_CAUGHT)
         private String fishCaught = "Fish caught";
-        @Translatable("enchantments_applied")
+        @Translatable(PlayerStat.RegistryKey.ENCHANTMENTS_APPLIED)
         private String enchantmentsApplied = "Enchantments applied";
-        @Translatable("supply_crates_opened")
+        @Translatable(PlayerStat.RegistryKey.SUPPLY_CRATES_OPENED)
         private String supplyCratesOpened = "Supply crates opened";
-        @Translatable("blocks_placed")
+        @Translatable(PlayerStat.RegistryKey.BLOCKS_PLACED)
         private String blocksPlaced = "Blocks placed";
-        @Translatable("blocks_broken")
+        @Translatable(PlayerStat.RegistryKey.BLOCKS_BROKEN)
         private String blocksBroken = "Blocks broken";
-        @Translatable("games_played")
+        @Translatable(PlayerTotalStat.RegistryKey.GAMES_PLAYED)
         private String gamesPlayed = "Games played";
-        @Translatable("wins")
+        @Translatable(PlayerTotalStat.RegistryKey.WINS)
         private String wins = "Wins";
-        @Translatable("losses")
+        @Translatable(PlayerTotalStat.RegistryKey.LOSSES)
         private String losses = "Losses";
 
     }

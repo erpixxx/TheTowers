@@ -12,9 +12,9 @@ import java.util.Collection;
  */
 public interface PlayerTotalStat extends PlayerStat {
 
-    PlayerStat GAMES_PLAYED = Registry.register("games_played");
-    PlayerStat WINS = Registry.register("wins");
-    PlayerStat LOSSES = Registry.register("losses");
+    PlayerStat GAMES_PLAYED = Registry.register(RegistryKey.GAMES_PLAYED);
+    PlayerStat WINS = Registry.register(RegistryKey.WINS);
+    PlayerStat LOSSES = Registry.register(RegistryKey.LOSSES);
 
     /**
      * Retrieves a {@link PlayerStat} instance by its key.
@@ -44,6 +44,12 @@ public interface PlayerTotalStat extends PlayerStat {
         ArrayList<PlayerStat> merged = new ArrayList<>(totalStats());
         merged.addAll(PlayerStat.stats());
         return merged;
+    }
+
+    interface RegistryKey {
+        String GAMES_PLAYED = "games_played";
+        String WINS = "wins";
+        String LOSSES = "losses";
     }
 
 }
