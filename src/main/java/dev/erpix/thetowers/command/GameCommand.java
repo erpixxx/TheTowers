@@ -1,12 +1,14 @@
 package dev.erpix.thetowers.command;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.erpix.thetowers.TheTowers;
+import dev.erpix.thetowers.config.i18n.Messages;
 import dev.erpix.thetowers.model.game.GameManager;
 import dev.erpix.thetowers.model.game.GameMap;
-import dev.erpix.thetowers.model.game.GamePlayer;
 import dev.erpix.thetowers.model.game.GameTeam;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -14,150 +16,136 @@ import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Optional;
 
 /*
  *
- * /game new
- * /game start
- * /game status
- * /game stop
+ * /ttgame map <map_name>
+ * /ttgame max-players <number>
+ * /ttgame start [force]
+ * /ttgame status
+ * /ttgame stop
  *
  */
 
 @SuppressWarnings("UnstableApiUsage")
 public class GameCommand implements CommandBase {
 
-    private final TheTowers theTowers = TheTowers.getInstance();
-
     @Override
     public @NotNull LiteralCommandNode<CommandSourceStack> create() {
         return Commands.literal("game")
-                .then(Commands.literal("map")
-                        .then(Commands.argument("map", StringArgumentType.word())
-                                .suggests((ctx, builder) -> {
-                                    for (GameMap map : theTowers.getMaps()) {
-                                        builder.suggest(map.getName());
-                                    }
-                                    return builder.buildFuture();
-                                })
-                                .executes(ctx -> {
-                                    CommandSender sender = ctx.getSource().getSender();
-
-                                    String mapName = StringArgumentType.getString(ctx, "map");
-                                    Optional<GameMap> map = theTowers.getMap(mapName);
-
-                                    if (map.isEmpty()) {
-                                        sender.sendRichMessage("<red>Nie znaleziono mapy o nazwie " + mapName);
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-
-                                    theTowers.getGameManager().setMap(map.get());
-                                    sender.sendRichMessage("<green>Ustawiono mapę na <gray>" + map.get().getName());
-
-                                    return Command.SINGLE_SUCCESS;
-                                })
-                                .build())
-                        .build())
-                .then(Commands.literal("start")
-                        .executes(ctx -> {
-                            CommandSender sender = ctx.getSource().getSender();
-
-                            GameManager game = theTowers.getGameManager();
-                            game.start();
-
-                            return Command.SINGLE_SUCCESS;
-                        })
-                        .build())
-                .then(Commands.literal("status")
-                        .executes(ctx -> {
-                            CommandSender sender = ctx.getSource().getSender();
-
-                            GameManager game = theTowers.getGameManager();
-
-                            sender.sendRichMessage("Status gry: " + game.getStage());
-                            sender.sendRichMessage("Mapa: " + game.getMap().getName());
-                            Collection<GameTeam> teams = game.getTeams();
-                            sender.sendRichMessage("<gray>Drużyny:");
-                            if (teams.isEmpty()) {
-                                sender.sendRichMessage("<red>Brak drużyn w grze.");
-                            } else {
-                                for (GameTeam team : teams) {
-                                    String teamInfo = String.format("  <color:#%s>%s</color> <gray>(%d graczy)",
-                                            team.getColor().getColorHex(), team.getDisplayName(), team.getMembers().size());
-                                    sender.sendRichMessage(teamInfo);
-                                }
-                            }
-                            Collection<GamePlayer> spectators = game.getSpectators();
-                            sender.sendRichMessage("<gray>Widzowie:");
-                            if (spectators.isEmpty()) {
-                                sender.sendRichMessage("  <red>Brak widzów w grze.");
-                            } else {
-                                for (GamePlayer spectator : spectators) {
-                                    sender.sendRichMessage("  <gray>" + spectator.getDisplayName());
-                                }
-                            }
-
-                            return Command.SINGLE_SUCCESS;
-                        })
-                        .build())
-                .then(Commands.literal("stop")
-                        .executes(ctx -> {
-                            CommandSender sender = ctx.getSource().getSender();
-                            GameManager game = theTowers.getGameManager();
-
-                            if (game.getStage() != GameManager.Stage.IN_PROGRESS) {
-                                sender.sendRichMessage("<red>Nie ma aktywnej gry do zatrzymania.");
-                                return Command.SINGLE_SUCCESS;
-                            }
-
-                            game.stop();
-                            sender.sendRichMessage("<green>Gra została zatrzymana.");
-
-                            return Command.SINGLE_SUCCESS;
-                        })
-                        .build())
+                .requires(ctx -> ctx.getSender().hasPermission("thetowers.command.game"))
+                .then(map())
+                .then(maxPlayers())
+                .then(start())
+                .then(status())
+                .then(stop())
                 .build();
     }
 
+    private LiteralArgumentBuilder<CommandSourceStack> map() {
+        return Commands.literal("map")
+                .requires(ctx -> ctx.getSender().hasPermission("thetowers.command.game.map"))
+                .then(Commands.argument("map_name", StringArgumentType.string())
+                        .suggests(SuggestionProviders.fromCollection(TheTowers.getInstance().getMaps().stream()
+                                .map(GameMap::getName)
+                                .toList()))
+                        .executes(ctx -> {
+                            TheTowers theTowers = TheTowers.getInstance();
+                            CommandSender sender = ctx.getSource().getSender();
+                            String mapName = ctx.getArgument("map_name", String.class);
+                            Optional<GameMap> map = theTowers.getMap(mapName);
+                            if (map.isEmpty()) {
+                                sender.sendRichMessage(Messages.MAP_NOT_FOUND.get(mapName));
+                                return Command.SINGLE_SUCCESS;
+                            }
+                            theTowers.getGameManager().setMap(map.get());
+                            sender.sendRichMessage(Messages.MAP_SET.get(mapName));
+                            return Command.SINGLE_SUCCESS;
+                        }));
+    }
+
+    private LiteralArgumentBuilder<CommandSourceStack> maxPlayers() {
+        return Commands.literal("max-players")
+                .requires(ctx -> ctx.getSender().hasPermission("thetowers.command.game.max-players"))
+                .then(Commands.argument("number", IntegerArgumentType.integer(1))
+                        .executes(ctx -> {
+                            CommandSender sender = ctx.getSource().getSender();
+                            int maxPlayers = ctx.getArgument("number", Integer.class);
+                            TheTowers.getInstance().getGameManager().setMaxPlayersPerTeam(maxPlayers);
+                            sender.sendRichMessage(Messages.CHANGED_MAX_PLAYERS.get(maxPlayers));
+                            return Command.SINGLE_SUCCESS;
+                        }));
+    }
+
+    private LiteralArgumentBuilder<CommandSourceStack> start() {
+        return Commands.literal("start")
+                .requires(ctx -> ctx.getSender().hasPermission("thetowers.command.game.start"))
+                .executes(ctx -> gameStart(ctx.getSource().getSender(), false))
+                .then(Commands.literal("force")
+                        .executes(ctx -> gameStart(ctx.getSource().getSender(), true)));
+    }
+
+    private LiteralArgumentBuilder<CommandSourceStack> status() {
+        return Commands.literal("status")
+                .requires(ctx -> ctx.getSender().hasPermission("thetowers.command.game.status"))
+                .executes(ctx -> {
+                    CommandSender sender = ctx.getSource().getSender();
+                    GameManager gm = TheTowers.getInstance().getGameManager();
+
+                    Iterator<Messages.Message> messages = Messages.GAME_STATUS.iterator();
+                    sender.sendRichMessage(messages.next().get());
+                    sender.sendRichMessage(messages.next().get(gm.getMap().getName()));
+                    sender.sendRichMessage(messages.next().get(gm.getStage().name()));
+                    sender.sendRichMessage(messages.next().get());
+                    for (GameTeam team : gm.getTeams()) {
+                        sender.sendRichMessage(Messages.GAME_STATUS_TEAM.get(team.getDisplayName(), team.getMembers().size()));
+                    }
+
+                    return Command.SINGLE_SUCCESS;
+                });
+    }
+
+    private LiteralArgumentBuilder<CommandSourceStack> stop() {
+        return Commands.literal("stop")
+                .requires(ctx -> ctx.getSender().hasPermission("thetowers.command.game.stop"))
+                .executes(ctx -> {
+                    CommandSender sender = ctx.getSource().getSender();
+                    GameManager game = TheTowers.getInstance().getGameManager();
+                    if (game.getStage() == GameManager.Stage.LOBBY) {
+                        sender.sendRichMessage(Messages.GAME_NOT_RUNNING.get());
+                        return 0;
+                    }
+                    game.stop();
+                    sender.sendRichMessage(Messages.GAME_STOPPED.get());
+                    return Command.SINGLE_SUCCESS;
+                });
+    }
+
     private int gameStart(CommandSender sender, boolean force) {
-
-        GameManager game = theTowers.getGameManager();
-        GameManager.Stage stage = game.getStage();
+        GameManager gm = TheTowers.getInstance().getGameManager();
+        GameManager.Stage stage = gm.getStage();
         if (stage != GameManager.Stage.LOBBY) {
-            sender.sendRichMessage("<red>Gra nie jest w stanie lobby, nie można jej rozpocząć.");
+            sender.sendRichMessage(Messages.GAME_ACTIVE.get());
             return 0;
         }
 
-        Collection<GameTeam> teams = game.getTeams();
-        if (teams.isEmpty()) {
-            sender.sendRichMessage("<red>Brak drużyn w grze.");
+        Collection<GameTeam> teams = gm.getTeams();
+        if (teams.size() < 2) {
+            sender.sendRichMessage(Messages.MUST_BE_AT_LEAST_2_TEAMS.get());
             return 0;
         }
 
-        int firstTeamSize = -1;
-        boolean sameSize = true;
+        int minPlayers = gm.getMaxPlayersPerTeam() / 2;
         for (GameTeam team : teams) {
-            Collection<GamePlayer> members = team.getMembers();
-            if (members.isEmpty()) {
-                sender.sendRichMessage("<red>Drużyna " + team.getDisplayName() + " nie ma żadnych graczy.");
+            if (team.getMembers().size() < minPlayers && !force) {
+                sender.sendRichMessage(Messages.TOO_FEW_MEMBERS.get(minPlayers));
                 return 0;
             }
-            int size = members.size();
-            if (firstTeamSize < 0) {
-                firstTeamSize = size;
-            } else if (size != firstTeamSize) {
-                sameSize = false;
-                break;
-            }
         }
 
-        if (!sameSize && !force) {
-            sender.sendRichMessage("<red>Drużyny muszą mieć tę samą liczbę graczy, aby rozpocząć grę.");
-            return 0;
-        }
-
-        game.start();
+        gm.start();
 
         return Command.SINGLE_SUCCESS;
     }

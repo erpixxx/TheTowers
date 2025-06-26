@@ -43,6 +43,10 @@ public class GameManager {
         this.stage = Stage.LOBBY;
     }
 
+    public static GameTeam createTeam(@NotNull GamePlayer leader, @NotNull String name, @NotNull GameTeam.Color color) {
+        return new GameTeam(leader, name, color);
+    }
+
     /**
      * Sets the map for the game and updates the maximum players per team based on the map's team setup.
      * <p>Removes any teams that exceed the maximum allowed players per team.</p>
@@ -108,11 +112,10 @@ public class GameManager {
      * @param color the color of the team to retrieve.
      * @return the {@link GameTeam} associated with the color, or null if not found.
      */
-    public @Nullable GameTeam getTeam(@NotNull GameTeam.Color color) {
+    public @NotNull Optional<GameTeam> getTeam(@NotNull GameTeam.Color color) {
         return teams.values().stream()
                 .filter(team -> team.getColor() == color)
-                .findFirst()
-                .orElse(null);
+                .findFirst();
     }
 
     /**
@@ -300,8 +303,9 @@ public class GameManager {
      * @param player the {@link Player} to respawn
      */
     private void respawn(@NotNull Player player) {
-        GamePlayer gamePlayer = getPlayer(player.getName());
-        if (gamePlayer == null) return;
+        Optional<GamePlayer> gamePlayerOpt = getPlayer(player.getName());
+        if (gamePlayerOpt.isEmpty()) return;
+        GamePlayer gamePlayer = gamePlayerOpt.get();
 
         // Start the respawn countdown
         AtomicInteger i = new AtomicInteger(0);
@@ -332,12 +336,11 @@ public class GameManager {
         }, 5 * Ticks.TICKS_PER_SECOND, Ticks.TICKS_PER_SECOND);
     }
 
-    public @Nullable GamePlayer getPlayer(@NotNull String name) {
+    public @NotNull Optional<GamePlayer> getPlayer(@NotNull String name) {
         return teams.values().stream()
                 .flatMap(team -> team.getMembers().stream())
                 .filter(player -> player.getName().equals(name))
-                .findFirst()
-                .orElse(null);
+                .findFirst();
     }
 
     /**

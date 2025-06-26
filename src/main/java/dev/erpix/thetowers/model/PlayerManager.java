@@ -65,4 +65,15 @@ public class PlayerManager {
         return Collections.unmodifiableCollection(players.values());
     }
 
+    /**
+     * Broadcasts a message to all players in the game.
+     *
+     * @param message the message to broadcast, formatted as a rich text string.
+     */
+    public void broadcast(@NotNull String message) {
+        for (GamePlayer player : players.values()) {
+            player.sendMessage(message);
+        }
+    }
+
 }

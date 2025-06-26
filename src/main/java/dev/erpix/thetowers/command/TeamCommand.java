@@ -2,319 +2,361 @@ package dev.erpix.thetowers.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.erpix.thetowers.TheTowers;
+import dev.erpix.thetowers.config.i18n.Messages;
 import dev.erpix.thetowers.model.game.GameManager;
 import dev.erpix.thetowers.model.game.GamePlayer;
 import dev.erpix.thetowers.model.game.GameTeam;
-import dev.erpix.thetowers.util.DisguiseHandler;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
+
+/*
+ *
+ * /team
+ * /team create <color> <name>
+ * /team disband
+ * /team join <name>
+ * /team leave
+ * /team remove <player>
+ * /team rename <new_name>
+ * /team set-color <color>
+ * /team set-leader <new_leader>
+ *
+ */
 
 @SuppressWarnings("UnstableApiUsage")
 public class TeamCommand implements CommandBase {
 
-    private final TheTowers theTowers = TheTowers.getInstance();
-
     @Override
     public @NotNull LiteralCommandNode<CommandSourceStack> create() {
-        GameManager game = theTowers.getGameManager();
         return Commands.literal("team")
+                .requires(ctx -> ctx.getSender().hasPermission("thetowers.command.team"))
                 .executes(ctx -> {
                     CommandSender sender = ctx.getSource().getSender();
-
-                    sender.sendRichMessage("<color:#4aa1ff>Tworzenie drużyny</color>");
-                    sender.sendRichMessage(" <color:#4aa1ff>»</color> <gray>/team</gray> create <green><kolor></green> <green><tag></green> <green><pełna_nazwa></green>");
-                    sender.sendRichMessage("<color:#4aa1ff>Usuwanie drużyny</color>");
-                    sender.sendRichMessage(" <color:#4aa1ff>»</color> <gray>/team</gray> disband");
-                    sender.sendRichMessage("<color:#4aa1ff>Dołączenie do drużyny</color>");
-                    sender.sendRichMessage(" <color:#4aa1ff>»</color> <gray>/team</gray> join <green><tag></green>");
-                    sender.sendRichMessage("<color:#4aa1ff>Wyjście z bieżącej drużyny</color>");
-                    sender.sendRichMessage(" <color:#4aa1ff>»</color> <gray>/team</gray> leave");
-                    sender.sendRichMessage("<color:#4aa1ff>Usuwanie członka z drużyny</color>");
-                    sender.sendRichMessage(" <color:#4aa1ff>»</color> <gray>/team</gray> remove <green><gracz></green>");
-
+                    Messages.TEAM_COMMAND_USAGE.forEach(line -> sender.sendRichMessage(line.get()));
                     return Command.SINGLE_SUCCESS;
                 })
-                .then(Commands.literal("create")
-                        .then(Commands.argument("color", StringArgumentType.word())
-                                .suggests((ctx, builder) -> {
-                                    Set<GameTeam.Color> takenColors = game.getTeams().stream()
-                                            .map(GameTeam::getColor)
-                                            .collect(Collectors.toSet());
-                                    for (GameTeam.Color color : GameTeam.Color.values()) {
-                                        if (takenColors.contains(color)) continue;
-                                        builder.suggest(color.name().toLowerCase());
-                                    }
-                                    return builder.buildFuture();
-                                })
-                                .then(Commands.argument("tag", StringArgumentType.word())
-
-                                        .executes(ctx -> {
-                                            CommandSender sender = ctx.getSource().getSender();
-
-                                            if (!(sender instanceof Player player)) {
-                                                sender.sendRichMessage("<red>Ta komenda może być używana tylko przez graczy.");
-                                                return Command.SINGLE_SUCCESS;
-                                            }
-
-                                            GameTeam.Color color = GameTeam.Color.from(ctx.getArgument("color", String.class));
-                                            if (color == null) {
-                                                sender.sendRichMessage("<red>Nieprawidłowy kolor drużyny.");
-                                                return Command.SINGLE_SUCCESS;
-                                            }
-                                            String tag = ctx.getArgument("tag", String.class).toUpperCase(Locale.ROOT);
-
-                                            if (tag.length() < 2 || tag.length() > 5) {
-                                                sender.sendRichMessage("<red>Tag drużyny musi mieć od 2 do 5 znaków.");
-                                                return Command.SINGLE_SUCCESS;
-                                            }
-
-                                            if (game.getStage() == GameManager.Stage.WAITING || game.getStage() == GameManager.Stage.IN_PROGRESS) {
-                                                sender.sendRichMessage("<red>Nie można utworzyć drużyny, ponieważ gra już trwa.");
-                                                return Command.SINGLE_SUCCESS;
-                                            }
-
-                                            Optional<GameTeam> sameColor = game.getTeams().stream()
-                                                    .filter(team -> team.getColor() == color)
-                                                    .findFirst();
-                                            if (sameColor.isPresent()) {
-                                                sender.sendRichMessage("<red>Drużyna o kolorze <color:#" + color.getColorHex() + ">" + color.getName() + "</color> już istnieje.");
-                                                return Command.SINGLE_SUCCESS;
-                                            }
-
-                                            Optional<GameTeam> sameTag = game.getTeams().stream()
-                                                    .filter(team -> team.getName().equalsIgnoreCase(tag))
-                                                    .findFirst();
-                                            if (sameTag.isPresent()) {
-                                                sender.sendRichMessage("<red>Drużyna o tagu " + tag + " już istnieje.");
-                                                return Command.SINGLE_SUCCESS;
-                                            }
-
-                                            Optional<GamePlayer> optPlayer = theTowers.getPlayerManager().getPlayer(player.getName());
-                                            if (optPlayer.isEmpty()) {
-                                                sender.sendRichMessage("<red>Coś poszło kurwesko nie tak jak powinno.");
-                                                return Command.SINGLE_SUCCESS;
-                                            }
-
-                                            GamePlayer gamePlayer = optPlayer.get();
-                                            GameTeam newTeam = new GameTeam(gamePlayer, tag, color);
-                                            game.addTeam(newTeam);
-
-                                            sender.sendRichMessage("<green>Stworzono drużynę o nazwie o tagu <color:#" + color.getColorHex() + ">" + tag + "</color>.");
-
-                                            return Command.SINGLE_SUCCESS;
-                                        })
-                                        .build())
-                                .build())
-                        .build())
-                .then(Commands.literal("disband")
-                        .executes(ctx -> {
-                            CommandSender sender = ctx.getSource().getSender();
-
-                            if (!(sender instanceof Player player)) {
-                                sender.sendRichMessage("<red>Ta komenda może być używana tylko przez graczy.");
-                                return Command.SINGLE_SUCCESS;
-                            }
-
-                            Optional<GamePlayer> optPlayer = theTowers.getPlayerManager().getPlayer(player.getName());
-                            if (optPlayer.isEmpty()) {
-                                sender.sendRichMessage("<red>Coś poszło kurwesko nie tak jak powinno.");
-                                return Command.SINGLE_SUCCESS;
-                            }
-                            GamePlayer gamePlayer = optPlayer.get();
-
-                            GameTeam team = gamePlayer.getTeam();
-                            if (team == null) {
-                                sender.sendRichMessage("<red>Nie jesteś w żadnej drużynie.");
-                                return Command.SINGLE_SUCCESS;
-                            }
-
-                            if (!team.getLeader().equals(gamePlayer)) {
-                                sender.sendRichMessage("<red>Tylko lider drużyny może ją rozwiązać.");
-                                return Command.SINGLE_SUCCESS;
-                            }
-
-                            game.removeTeam(team);
-                            game.addSpectator(gamePlayer);
-                            sender.sendRichMessage("<green>Drużyna <color:#" + team.getColor().getColorHex() + ">" + team.getDisplayName() + "</color> została rozwiązana.");
-                            team.getMembers().forEach(member -> {
-                                member.setTeam(null);
-                                DisguiseHandler.refresh(Bukkit.getPlayer(member.getName()));
-                            });
-
-                            return Command.SINGLE_SUCCESS;
-                        })
-                        .build())
-                .then(Commands.literal("join")
-                        .then(Commands.argument("tag", StringArgumentType.word())
-                                .executes(ctx -> {
-                                    CommandSender sender = ctx.getSource().getSender();
-
-                                    if (!(sender instanceof Player player)) {
-                                        sender.sendRichMessage("<red>Ta komenda może być używana tylko przez graczy.");
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-
-                                    String tag = ctx.getArgument("tag", String.class);
-                                    Optional<GameTeam> optTeam = game.getTeams().stream()
-                                            .filter(team -> team.getName().equalsIgnoreCase(tag))
-                                            .findFirst();
-
-                                    if (optTeam.isEmpty()) {
-                                        sender.sendRichMessage("<red>Drużyna o tagu " + tag + " nie istnieje.");
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-                                    GameTeam team = optTeam.get();
-
-                                    Optional<GamePlayer> optPlayer = theTowers.getPlayerManager().getPlayer(player.getName());
-                                    if (optPlayer.isEmpty()) {
-                                        sender.sendRichMessage("<red>Coś poszło kurwesko nie tak jak powinno.");
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-                                    GamePlayer gamePlayer = optPlayer.get();
-
-                                    if (gamePlayer.getTeam() != null) {
-                                        sender.sendRichMessage("<red>Już jesteś w drużynie.");
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-
-                                    if (team.getMembers().size() >= game.getMaxPlayersPerTeam()) {
-                                        sender.sendRichMessage("<red>Drużyna <color:#" + team.getColor().getColorHex() + ">" + team.getDisplayName() + "</color> jest pełna.");
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-
-                                    team.addMember(gamePlayer);
-                                    sender.sendRichMessage("<green>Dołączono do drużyny <color:#" + team.getColor().getColorHex() + ">" + team.getDisplayName() + "</color>.");
-
-                                    return Command.SINGLE_SUCCESS;
-                                })
-                                .build())
-                        .build())
-                .then(Commands.literal("leave")
-                        .executes(ctx -> {
-                            CommandSender sender = ctx.getSource().getSender();
-
-                            if (!(sender instanceof Player player)) {
-                                sender.sendRichMessage("<red>Ta komenda może być używana tylko przez graczy.");
-                                return Command.SINGLE_SUCCESS;
-                            }
-
-                            Optional<GamePlayer> optPlayer = theTowers.getPlayerManager().getPlayer(player.getName());
-                            if (optPlayer.isEmpty()) {
-                                sender.sendRichMessage("<red>Coś poszło kurwesko nie tak jak powinno.");
-                                return Command.SINGLE_SUCCESS;
-                            }
-                            GamePlayer gamePlayer = optPlayer.get();
-
-                            GameTeam team = gamePlayer.getTeam();
-                            if (team == null) {
-                                sender.sendRichMessage("<red>Nie jesteś w żadnej drużynie.");
-                                return Command.SINGLE_SUCCESS;
-                            }
-
-                            if (team.getLeader().equals(gamePlayer)) {
-                                sender.sendRichMessage("<red>Nie możesz opuścić drużyny jako jej lider.");
-                                return Command.SINGLE_SUCCESS;
-                            }
-
-                            team.removeMember(gamePlayer);
-                            gamePlayer.setTeam(null);
-                            game.addSpectator(gamePlayer);
-                            DisguiseHandler.refresh(player);
-
-                            sender.sendRichMessage("<green>Opuszczono drużynę <color:#" + team.getColor().getColorHex() + ">" + team.getDisplayName() + "</color>.");
-
-                            return Command.SINGLE_SUCCESS;
-                        })
-                        .build())
-                .then(Commands.literal("remove")
-                        .then(Commands.argument("member", StringArgumentType.word())
-                                .suggests((ctx, builder) -> {
-                                    CommandSender sender = ctx.getSource().getSender();
-
-                                    if (sender instanceof Player player) {
-                                        Optional<GamePlayer> optPlayer = theTowers.getPlayerManager().getPlayer(player.getName());
-                                        if (optPlayer.isEmpty()) {
-                                            return builder.buildFuture();
-                                        }
-                                        GamePlayer gamePlayer = optPlayer.get();
-
-                                        GameTeam team = gamePlayer.getTeam();
-                                        if (team == null) {
-                                            return builder.buildFuture();
-                                        }
-
-                                        Set<String> members = team.getMembers().stream()
-                                                .map(GamePlayer::getName)
-                                                .collect(Collectors.toSet());
-                                        for (String member : members) {
-                                            builder.suggest(member);
-                                        }
-                                    }
-
-                                    return builder.buildFuture();
-                                })
-                                .executes(ctx -> {
-                                    CommandSender sender = ctx.getSource().getSender();
-
-                                    if (!(sender instanceof Player player)) {
-                                        sender.sendRichMessage("<red>Ta komenda może być używana tylko przez graczy.");
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-
-                                    Optional<GamePlayer> optPlayer = theTowers.getPlayerManager().getPlayer(player.getName());
-                                    if (optPlayer.isEmpty()) {
-                                        sender.sendRichMessage("<red>Coś poszło kurwesko nie tak jak powinno.");
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-                                    GamePlayer gamePlayer = optPlayer.get();
-
-                                    GameTeam team = gamePlayer.getTeam();
-                                    if (team == null) {
-                                        sender.sendRichMessage("<red>Nie jesteś w żadnej drużynie.");
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-
-                                    if (!team.getLeader().equals(gamePlayer)) {
-                                        sender.sendRichMessage("<red>Tylko lider drużyny może usuwać członków.");
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-
-                                    String memberName = ctx.getArgument("member", String.class);
-                                    Optional<GamePlayer> optMember = theTowers.getPlayerManager().getPlayer(memberName);
-                                    if (optMember.isEmpty()) {
-                                        sender.sendRichMessage("<red>Gracz " + memberName + " nie jest w twojej drużynie.");
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-                                    GamePlayer member = optMember.get();
-
-                                    if (!team.hasMember(member)) {
-                                        sender.sendRichMessage("<red>Gracz " + memberName + " nie jest w twojej drużynie.");
-                                        return Command.SINGLE_SUCCESS;
-                                    }
-
-                                    team.removeMember(member);
-                                    member.setTeam(null);
-                                    game.addSpectator(member);
-                                    DisguiseHandler.refresh(Bukkit.getPlayer(member.getName()));
-
-                                    sender.sendRichMessage("<green>Usunięto gracza <color:#" + member.getTeam().getColor().getColorHex() + ">" + member.getName() + "</color> z drużyny <color:#" + team.getColor().getColorHex() + ">" + team.getDisplayName() + "</color>.");
-
-                                    return Command.SINGLE_SUCCESS;
-                                })
-                                .build())
-                        .build())
+                .then(teamCreate())
+                .then(teamDisband())
+                .then(teamJoin())
+                .then(teamLeave())
+                .then(teamRemove())
+                .then(teamRename())
+                .then(teamSetColor())
+                .then(teamSetLeader())
                 .build();
+    }
+
+    private LiteralArgumentBuilder<CommandSourceStack> teamCreate() {
+        return Commands.literal("create")
+                .requires(ctx -> ctx.getSender().hasPermission("thetowers.command.team.create"))
+                .then(Commands.argument("color", StringArgumentType.word())
+                        .suggests(SuggestionProviders.fromCollection(Arrays.stream(GameTeam.Color.values())
+                                .map(Enum::name)
+                                .toList()))
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .executes(ctx -> {
+                                    String colorName = ctx.getArgument("color", String.class).toUpperCase(Locale.ROOT);
+                                    String teamName = ctx.getArgument("name", String.class);
+                                    getGamePlayer(ctx, player -> {
+                                        GameTeam.Color color = GameTeam.Color.from(colorName);
+                                        if (color == null) {
+                                            player.sendMessage(Messages.TEAM_INVALID_COLOR.get(colorName));
+                                            return;
+                                        }
+
+                                        if (!GameTeam.isValidName(teamName)) {
+                                            player.sendMessage(Messages.TEAM_INVALID_NAME.get(teamName));
+                                            return;
+                                        }
+
+                                        GameManager gm = TheTowers.getInstance().getGameManager();
+                                        Optional<GameTeam> existingTeam = gm.getTeam(color);
+                                        if (existingTeam.isPresent()) {
+                                            player.sendMessage(Messages.TEAM_COLOR_ALREADY_TAKEN.get(colorName));
+                                            return;
+                                        }
+                                        existingTeam = gm.getTeam(teamName);
+                                        if (existingTeam.isPresent()) {
+                                            player.sendMessage(Messages.TEAM_ALREADY_EXISTS.get(teamName));
+                                            return;
+                                        }
+
+                                        GameTeam team = GameManager.createTeam(player, teamName, color);
+                                        gm.addTeam(team);
+                                        player.sendMessage(Messages.TEAM_CREATED.get(team.getDisplayName()));
+                                    });
+                                    return Command.SINGLE_SUCCESS;
+                                })
+                                .build())
+                        .build());
+    }
+
+    private LiteralArgumentBuilder<CommandSourceStack> teamDisband() {
+        return Commands.literal("disband")
+                .requires(ctx -> ctx.getSender().hasPermission("thetowers.command.team.disband"))
+                .executes(ctx -> {
+                    getGamePlayer(ctx, player -> {
+                        GameTeam team = player.getTeam();
+                        if (team == null) {
+                            player.sendMessage(Messages.NOT_IN_TEAM.get());
+                            return;
+                        }
+
+                        if (team.getLeader() != player) {
+                            player.sendMessage(Messages.HAVE_TO_BE_LEADER_TO_DISBAND.get());
+                            return;
+                        }
+
+                        GameManager gm = TheTowers.getInstance().getGameManager();
+                        gm.removeTeam(team);
+                    });
+                    return Command.SINGLE_SUCCESS;
+                });
+    }
+
+    private LiteralArgumentBuilder<CommandSourceStack> teamJoin() {
+        return Commands.literal("join")
+                .requires(ctx -> ctx.getSender().hasPermission("thetowers.command.team.join"))
+                .then(Commands.argument("name", StringArgumentType.word())
+                        .executes(ctx -> {
+                            String teamName = ctx.getArgument("name", String.class);
+                            getGamePlayer(ctx, player -> {
+                                GameTeam currentTeam = player.getTeam();
+                                if (currentTeam != null) {
+                                    player.sendMessage(Messages.ALREADY_IN_TEAM.get());
+                                    return;
+                                }
+
+                                GameManager gm = TheTowers.getInstance().getGameManager();
+                                Optional<GameTeam> team = gm.getTeam(teamName);
+                                if (team.isEmpty()) {
+                                    player.sendMessage(Messages.TEAM_NOT_FOUND.get(teamName));
+                                    return;
+                                }
+
+                                if (team.get().isFull()) {
+                                    player.sendMessage(Messages.TEAM_FULL.get());
+                                    return;
+                                }
+
+                                team.get().addMember(player);
+                                player.sendMessage(Messages.TEAM_JOIN.get(team.get().getDisplayName()));
+                            });
+                            return Command.SINGLE_SUCCESS;
+                        })
+                        .build());
+    }
+
+    private LiteralArgumentBuilder<CommandSourceStack> teamLeave() {
+        return Commands.literal("leave")
+                .requires(ctx -> ctx.getSender().hasPermission("thetowers.command.team.leave"))
+                .executes(ctx -> {
+                    getGamePlayer(ctx, player -> {
+                        GameTeam team = player.getTeam();
+                        if (team == null) {
+                            player.sendMessage(Messages.NOT_IN_TEAM.get());
+                            return;
+                        }
+
+                        if (team.getLeader() == player) {
+                            player.sendMessage(Messages.CANNOT_LEAVE_IF_LEADER.get());
+                            return;
+                        }
+
+                        team.removeMember(player);
+                        player.sendMessage(Messages.TEAM_LEAVE.get(team.getDisplayName()));
+                    });
+                    return Command.SINGLE_SUCCESS;
+                });
+    }
+
+    private LiteralArgumentBuilder<CommandSourceStack> teamRemove() {
+        return Commands.literal("remove")
+                .requires(ctx -> ctx.getSender().hasPermission("thetowers.command.team.remove"))
+                .then(Commands.argument("player", StringArgumentType.word())
+                        .executes(ctx -> {
+                            String playerName = ctx.getArgument("player", String.class);
+                            getGamePlayer(ctx, player -> {
+                                GameTeam team = requireTeamLeader(player);
+                                if (team == null) return;
+
+                                GamePlayer targetPlayer = requirePlayerInTeam(team, playerName, player);
+                                if (targetPlayer == null) return;
+
+                                if (targetPlayer == player) {
+                                    player.sendMessage(Messages.CANNOT_REMOVE_YOURSELF_FROM_TEAM.get());
+                                    return;
+                                }
+
+                                team.removeMember(targetPlayer, true);
+                                targetPlayer.sendMessage(Messages.KICKED_FROM_TEAM.get(team.getDisplayName()));
+                            });
+                            return Command.SINGLE_SUCCESS;
+                        })
+                        .build());
+    }
+
+    private LiteralArgumentBuilder<CommandSourceStack> teamRename() {
+        return Commands.literal("rename")
+                .requires(ctx -> ctx.getSender().hasPermission("thetowers.command.team.rename"))
+                .then(Commands.argument("new_name", StringArgumentType.word())
+                        .executes(ctx -> {
+                            String newName = ctx.getArgument("new_name", String.class);
+                            getGamePlayer(ctx, player -> {
+                                GameTeam team = requireTeamLeader(player);
+                                if (team == null) return;
+
+                                if (!GameTeam.isValidName(newName)) {
+                                    player.sendMessage(Messages.TEAM_INVALID_NAME.get(newName));
+                                    return;
+                                }
+
+                                if (TheTowers.getInstance().getGameManager().getTeam(newName).isPresent()) {
+                                    player.sendMessage(Messages.TEAM_ALREADY_EXISTS.get(newName));
+                                    return;
+                                }
+
+                                String oldName = team.getName();
+                                team.setName(newName);
+                                player.sendMessage(Messages.TEAM_CHANGED_NAME.get(oldName, newName));
+                            });
+                            return Command.SINGLE_SUCCESS;
+                        })
+                        .build());
+    }
+
+    private LiteralArgumentBuilder<CommandSourceStack> teamSetColor() {
+        return Commands.literal("set-color")
+                .requires(ctx -> ctx.getSender().hasPermission("thetowers.command.team.set-color"))
+                .then(Commands.argument("color", StringArgumentType.word())
+                        .suggests(SuggestionProviders.fromCollection(Arrays.stream(GameTeam.Color.values())
+                                .map(Enum::name)
+                                .toList()))
+                        .executes(ctx -> {
+                            String colorName = ctx.getArgument("color", String.class).toUpperCase(Locale.ROOT);
+                            getGamePlayer(ctx, player -> {
+                                GameTeam team = requireTeamLeader(player);
+                                if (team == null) return;
+
+                                GameTeam.Color color = GameTeam.Color.from(colorName);
+                                if (color == null) {
+                                    player.sendMessage(Messages.TEAM_INVALID_COLOR.get(colorName));
+                                    return;
+                                }
+
+                                if (TheTowers.getInstance().getGameManager().getTeam(color).isPresent()) {
+                                    player.sendMessage(Messages.TEAM_COLOR_ALREADY_TAKEN.get(colorName));
+                                    return;
+                                }
+
+                                team.setColor(color);
+                                player.sendMessage(Messages.TEAM_COLOR_CHANGED.get(color));
+                            });
+                            return Command.SINGLE_SUCCESS;
+                        })
+                        .build());
+    }
+
+    private LiteralArgumentBuilder<CommandSourceStack> teamSetLeader() {
+        return Commands.literal("set-leader")
+                .requires(ctx -> ctx.getSender().hasPermission("thetowers.command.team.set-leader"))
+                .then(Commands.argument("player", StringArgumentType.word())
+                        .suggests((ctx, builder) -> {
+                            getGamePlayer(ctx, player -> {
+                                GameTeam team = player.getTeam();
+                                if (team == null) {
+                                    return;
+                                }
+                                team.getMembers().stream()
+                                        .filter(member -> !member.equals(player))
+                                        .map(GamePlayer::getName)
+                                        .iterator()
+                                        .forEachRemaining(builder::suggest);
+                            });
+                            return builder.buildFuture();
+                        })
+                        .executes(ctx -> {
+                            String playerName = ctx.getArgument("player", String.class);
+                            getGamePlayer(ctx, player -> {
+                                GameTeam team = requireTeamLeader(player);
+                                if (team == null) return;
+
+                                GamePlayer targetPlayer = requirePlayerInTeam(team, playerName, player);
+                                if (targetPlayer == null) return;
+
+                                team.setLeader(targetPlayer);
+                                player.sendMessage(Messages.TEAM_TRANSFERRED_LEADER.get(targetPlayer.getDisplayNameNoTag()));
+                                targetPlayer.sendMessage(Messages.TEAM_LEADERSHIP_GIVEN.get(team.getDisplayName()));
+                            });
+                            return Command.SINGLE_SUCCESS;
+                        })
+                        .build());
+    }
+
+    private void getGamePlayer(@NotNull CommandContext<CommandSourceStack> ctx, @NotNull Consumer<GamePlayer> action) {
+        CommandSender sender = ctx.getSource().getSender();
+        if (!(sender instanceof Player player)) {
+            sender.sendRichMessage(Messages.PLAYER_ONLY.get());
+            return;
+        }
+
+        Optional<GamePlayer> gamePlayer = TheTowers.getInstance().getPlayerManager().getPlayer(player.getName());
+        if (gamePlayer.isEmpty()) {
+            return;
+        }
+
+        GameManager.Stage stage = TheTowers.getInstance().getGameManager().getStage();
+        if (stage != GameManager.Stage.LOBBY) {
+            player.sendRichMessage(Messages.GAME_ACTIVE.get());
+            return;
+        }
+
+        action.accept(gamePlayer.get());
+    }
+
+    private @Nullable GameTeam requireInTeam(@NotNull GamePlayer player) {
+        GameTeam team = player.getTeam();
+        if (team == null) {
+            player.sendMessage(Messages.NOT_IN_TEAM.get());
+            return null;
+        }
+        return team;
+    }
+
+    private @Nullable GameTeam requireTeamLeader(@NotNull GamePlayer player) {
+        GameTeam team = requireInTeam(player);
+        if (team == null) {
+            return null;
+        }
+
+        if (!player.equals(team.getLeader())) {
+            player.sendMessage(Messages.MUST_BE_A_LEADER.get());
+            return null;
+        }
+
+        return team;
+    }
+
+    private @Nullable GamePlayer requirePlayerInTeam(GameTeam team, String name, GamePlayer requester) {
+        Optional<GamePlayer> target = TheTowers.getInstance().getGameManager().getPlayer(name);
+        if (target.isEmpty() || !team.hasMember(target.get())) {
+            requester.sendMessage(Messages.PLAYER_NOT_IN_TEAM.get());
+            return null;
+        }
+        return target.get();
     }
 
 }

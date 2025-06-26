@@ -8,6 +8,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.erpix.thetowers.TheTowers;
+import dev.erpix.thetowers.config.i18n.Messages;
 import dev.erpix.thetowers.model.*;
 import dev.erpix.thetowers.model.game.GamePlayer;
 import dev.erpix.thetowers.model.game.GameTeam;
@@ -16,21 +17,17 @@ import dev.erpix.thetowers.util.ItemGenerator;
 import dev.erpix.thetowers.util.TriConsumer;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 /*
  *
+ * /ttadmin broadcast <message> - Broadcasts a message to all players.
  * /ttadmin item <item_name> - Gives an item by name.
  * /ttadmin team <tag> disband - Disbands a team by name.
  * /ttadmin team <tag> edit name <new_name> - Changes the name of a team.
@@ -52,8 +49,17 @@ public class AdminCommand implements CommandBase {
 
     @Override
     public @NotNull LiteralCommandNode<CommandSourceStack> create() {
-        return Commands.literal("ttadmin")
+        return Commands.literal("thetowersadmin")
                 .requires(source -> source.getSender().hasPermission("thetowers.admin"))
+                .then(Commands.literal("broadcast")
+                        .then(Commands.argument("message", StringArgumentType.greedyString())
+                                .executes(ctx -> {
+                                    String message = ctx.getArgument("message", String.class);
+                                    TheTowers.getInstance().getPlayerManager().broadcast(message);
+                                    return Command.SINGLE_SUCCESS;
+                                })
+                                .build())
+                        .build())
                 .then(Commands.literal("item")
                         .then(Commands.argument("item_name", StringArgumentType.word())
                                 .suggests(SuggestionProviders.fromCollection(ItemGenerator.ITEMS.keySet()))
@@ -61,19 +67,19 @@ public class AdminCommand implements CommandBase {
                                     CommandSender sender = ctx.getSource().getSender();
 
                                     if (!(sender instanceof Player player)) {
-                                        sender.sendRichMessage("<red>This command can only be used by players.");
+                                        sender.sendRichMessage(Messages.PLAYER_ONLY.get());
                                         return Command.SINGLE_SUCCESS;
                                     }
 
                                     String itemName = ctx.getArgument("item_name", String.class);
 
                                     if (!ItemGenerator.ITEMS.containsKey(itemName)) {
-                                        sender.sendRichMessage("<red>Item '" + itemName + "' does not exist.");
+                                        sender.sendRichMessage(Messages.ITEM_NOT_FOUND.get(itemName));
                                         return Command.SINGLE_SUCCESS;
                                     }
 
                                     player.getInventory().addItem(ItemGenerator.ITEMS.get(itemName).get());
-                                    sender.sendRichMessage("<green>Gave you item: <white>" + itemName);
+                                    sender.sendRichMessage(Messages.ITEM_GIVEN.get(itemName));
 
                                     return Command.SINGLE_SUCCESS;
                                 })
@@ -101,8 +107,12 @@ public class AdminCommand implements CommandBase {
 
     @Override
     public @NotNull List<String> aliases() {
-        return List.of("thetowersadmin");
+        return List.of("ttadmin");
     }
+
+    /*
+     * Team Commands
+     */
 
     private RequiredArgumentBuilder<CommandSourceStack, String> teamName() {
         return Commands.argument("team_name", StringArgumentType.word())
@@ -116,7 +126,7 @@ public class AdminCommand implements CommandBase {
 
         Optional<GameTeam> teamOpt = TheTowers.getInstance().getGameManager().getTeam(teamName);
         if (teamOpt.isEmpty()) {
-            sender.sendRichMessage("<red>Cannot find team with name: " + teamName);
+            sender.sendRichMessage(Messages.TEAM_NOT_FOUND.get(teamName));
             return;
         }
 
@@ -130,7 +140,7 @@ public class AdminCommand implements CommandBase {
                     CommandSender sender = ctx.getSource().getSender();
                     findTeam(ctx, team -> {
                         TheTowers.getInstance().getGameManager().removeTeam(team);
-                        sender.sendRichMessage("<green>Disbanded team " + team.getDisplayName() + ".");
+                        sender.sendRichMessage(Messages.TEAM_DISBANDED.get(team.getDisplayName()));
                     });
                     return Command.SINGLE_SUCCESS;
                 });
@@ -145,19 +155,15 @@ public class AdminCommand implements CommandBase {
                             findTeam(ctx, team -> {
                                 String oldName = team.getName();
                                 if (!GameTeam.isValidName(newName)) {
-                                    sender.sendRichMessage("<red>Invalid team name: " + newName);
-                                    return;
-                                }
-                                if (newName.equals(oldName)) {
-                                    sender.sendRichMessage("<red>Team name is already set to '" + newName + "'.");
+                                    sender.sendRichMessage(Messages.TEAM_INVALID_NAME.get(newName));
                                     return;
                                 }
                                 if (TheTowers.getInstance().getGameManager().getTeam(newName).isPresent()) {
-                                    sender.sendRichMessage("<red>Team with name '" + newName + "' already exists.");
+                                    sender.sendRichMessage(Messages.TEAM_ALREADY_EXISTS.get(newName));
                                     return;
                                 }
                                 team.setName(newName);
-                                sender.sendRichMessage("<green>Changed team name from '<gray>" + oldName + "</gray>' to '<gray>" + newName + "</gray>'.");
+                                sender.sendRichMessage(Messages.TEAM_CHANGED_NAME.get(oldName, newName));
                             });
                             return Command.SINGLE_SUCCESS;
                         })
@@ -177,20 +183,16 @@ public class AdminCommand implements CommandBase {
                             findTeam(ctx, team -> {
                                 GameTeam.Color color = GameTeam.Color.from(colorName);
                                 if (color == null) {
-                                    sender.sendRichMessage("<red>Invalid color: " + colorName);
-                                    return;
-                                }
-                                if (team.getColor() == color) {
-                                    sender.sendRichMessage("<red>Team color is already set to '" + color.name() + "'.");
+                                    sender.sendRichMessage(Messages.TEAM_INVALID_COLOR.get(colorName));
                                     return;
                                 }
                                 if (TheTowers.getInstance().getGameManager().getTeams().stream()
                                         .anyMatch(t -> t != team && t.getColor() == color)) {
-                                    sender.sendRichMessage("<red>Another team already has the color '" + color.name() + "'.");
+                                    sender.sendRichMessage(Messages.TEAM_COLOR_ALREADY_TAKEN.get(color.name()));
                                     return;
                                 }
                                 team.setColor(color);
-                                sender.sendRichMessage("<green>Changed team color to <color:#" + color.getColorHex() + ">" + color.name() + "</color>.");
+                                sender.sendRichMessage(Messages.TEAM_COLOR_CHANGED.get("<color:#" + color.getColorHex() + ">" + color.name() + "</color>"));
                             });
                             return Command.SINGLE_SUCCESS;
                         })
@@ -222,7 +224,7 @@ public class AdminCommand implements CommandBase {
             int value = ctx.getArgument("value", Integer.class);
             findTeam(ctx, team -> {
                 action.accept(team, value);
-                sender.sendRichMessage("<green>Updated souls for team " + team.getDisplayName() + ": <white>" + team.getSouls() + "</white>.");
+                sender.sendRichMessage(Messages.TEAM_SOULS_UPDATED.get(team.getDisplayName(), team.getSouls()));
             });
             return Command.SINGLE_SUCCESS;
         };
@@ -233,13 +235,14 @@ public class AdminCommand implements CommandBase {
                 .executes(ctx -> {
                     CommandSender sender = ctx.getSource().getSender();
                     findTeam(ctx, team -> {
-                        sender.sendRichMessage(Colors.format(Colors.PRIMARY) + "Team <white>" + team.getDisplayName() + "</white>:");
-                        sender.sendRichMessage(Colors.format(Colors.SECONDARY) + "Leader: <white>" + team.getLeader().getName());
-                        sender.sendRichMessage(Colors.format(Colors.SECONDARY) + "Color: <color:#" + team.getColor().getColorHex() + ">" + team.getColor().name());
-                        sender.sendRichMessage(Colors.format(Colors.SECONDARY) + "Souls: <white>" + team.getSouls());
-                        sender.sendRichMessage(Colors.format(Colors.SECONDARY) + "Heart Health: <white>" + team.getHeartHealth());
-                        sender.sendRichMessage(Colors.format(Colors.SECONDARY) + "Members: <white>" + String.join(", ", team.getMembers().stream()
-                                .map(GamePlayer::getName).toList()));
+                        Iterator<Messages.Message> messages = Messages.ADMIN_TEAM_INFO.iterator();
+                        sender.sendRichMessage(messages.next().get(team.getDisplayName()));
+                        sender.sendRichMessage(messages.next().get(team.getLeader().getName()));
+                        sender.sendRichMessage(messages.next().get(String.join(", ", team.getMembers().stream()
+                                .map(GamePlayer::getName).toList())));
+                        sender.sendRichMessage(messages.next().get(team.getColor().name()));
+                        sender.sendRichMessage(messages.next().get(team.getSouls()));
+                        sender.sendRichMessage(messages.next().get(team.getHeartHealth()));
                     });
                     return Command.SINGLE_SUCCESS;
                 });
@@ -257,12 +260,13 @@ public class AdminCommand implements CommandBase {
 
                     ProfileManager pm = TheTowers.getInstance().getProfileManager();
                     pm.getProfile(playerName).ifPresentOrElse(profile -> {
-                        sender.sendRichMessage(Colors.format(Colors.PRIMARY) + "Profile for <white>" + playerName + "</white>:");
-                        for (PlayerStat stat : PlayerTotalStat.values()) {
+                        sender.sendRichMessage(Messages.ADMIN_PROFILE_INFO.get(playerName));
+                        for (PlayerStat stat : PlayerTotalStat.totalStats()) {
                             int value = profile.getStats().getStat(stat);
-                            sender.sendRichMessage(Colors.format(Colors.SECONDARY) + stat.getKey() + ": <white>" + value);
+                            sender.sendRichMessage(Colors.format(Colors.PRIMARY) + "» " + Colors.format(Colors.SECONDARY) +
+                                    Messages.translate(stat.getKey()) + ": <gray>" + value);
                         }
-                    }, () -> sender.sendRichMessage("<red>Profile for player '" + playerName + "' not found."));
+                    }, () -> sender.sendRichMessage(Messages.PROFILE_NOT_FOUND.get(playerName)));
 
                     return Command.SINGLE_SUCCESS;
                 });
@@ -284,8 +288,8 @@ public class AdminCommand implements CommandBase {
                             ProfileManager pm = TheTowers.getInstance().getProfileManager();
                             pm.getProfile(playerName).ifPresentOrElse(profile -> {
                                 profile.getStats().reset();
-                                sender.sendRichMessage("<green>Reset all stats for player <gray>" + playerName + "</gray>.");
-                            }, () -> sender.sendRichMessage("<red>Profile for player '" + playerName + "' not found."));
+                                sender.sendRichMessage(Messages.ADMIN_STATS_RESET.get(playerName));
+                            }, () -> sender.sendRichMessage(Messages.PROFILE_NOT_FOUND.get(playerName)));
 
                             return Command.SINGLE_SUCCESS;
                         }));
@@ -293,8 +297,7 @@ public class AdminCommand implements CommandBase {
 
     private RequiredArgumentBuilder<CommandSourceStack, String> editProfileStat(TriConsumer<PlayerProfile, PlayerStat, Integer> action) {
         return Commands.argument("stat", StringArgumentType.word())
-                .suggests(SuggestionProviders.fromCollection(Stream.of(PlayerStat.values(), PlayerTotalStat.values())
-                        .flatMap(Collection::stream)
+                .suggests(SuggestionProviders.fromCollection(PlayerTotalStat.stats().stream()
                         .map(PlayerStat::getKey)
                         .toList()))
                 .then(Commands.argument("value", IntegerArgumentType.integer(0))
@@ -306,15 +309,15 @@ public class AdminCommand implements CommandBase {
 
                             PlayerStat stat = PlayerTotalStat.fromKey(statKey);
                             if (stat == null) {
-                                sender.sendRichMessage("<red>Invalid stat key: " + statKey);
+                                sender.sendRichMessage(Messages.INVALID_STAT_KEY.get(statKey));
                                 return Command.SINGLE_SUCCESS;
                             }
 
                             ProfileManager pm = TheTowers.getInstance().getProfileManager();
                             pm.getProfile(playerName).ifPresentOrElse(profile -> {
                                 action.accept(profile, stat, value);
-                                sender.sendRichMessage("<green>Updated stat <gray>" + stat.getKey() + "</gray> for player <gray>" + playerName + "</gray> to <gray>" + value + "</gray>.");
-                            }, () -> sender.sendRichMessage("<red>Profile for player '" + playerName + "' not found."));
+                                sender.sendRichMessage(Messages.ADMIN_UPDATE_STAT.get(stat.getKey(), playerName, value));
+                            }, () -> sender.sendRichMessage(Messages.PROFILE_NOT_FOUND.get(playerName)));
 
                             return Command.SINGLE_SUCCESS;
                         }));

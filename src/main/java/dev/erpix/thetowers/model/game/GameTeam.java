@@ -1,6 +1,7 @@
 package dev.erpix.thetowers.model.game;
 
 import dev.erpix.thetowers.TheTowers;
+import dev.erpix.thetowers.config.i18n.Messages;
 import dev.erpix.thetowers.util.DisguiseHandler;
 import lombok.Getter;
 import lombok.NonNull;
@@ -23,9 +24,9 @@ public class GameTeam {
     private final Map<String, GamePlayer> members = new LinkedHashMap<>();
     @NonNull @Getter
     private String name;
-    @NonNull @Getter @Setter
+    @NonNull @Getter
     private GamePlayer leader;
-    @NonNull @Getter @Setter
+    @NonNull @Getter
     private Color color;
     @Getter @Setter
     private int heartHealth;
@@ -41,7 +42,7 @@ public class GameTeam {
      * @throws IllegalArgumentException if the name is invalid.
      * @see #isValidName(String)
      */
-    public GameTeam(@NotNull GamePlayer leader, @NotNull String name, @NotNull Color color) {
+    GameTeam(@NotNull GamePlayer leader, @NotNull String name, @NotNull Color color) {
         if (!isValidName(name)) {
             throw new IllegalArgumentException("Invalid team name: " + name);
         }
@@ -64,6 +65,15 @@ public class GameTeam {
     }
 
     /**
+     * Checks if the team is full based on the maximum players allowed per team.
+     *
+     * @return true if the team is full, false otherwise.
+     */
+    public boolean isFull() {
+        return members.size() >= TheTowers.getInstance().getGameManager().getMaxPlayersPerTeam();
+    }
+
+    /**
      * Sets the name of the team.
      *
      * @param name the new name for the team.
@@ -78,6 +88,7 @@ public class GameTeam {
         this.name = name;
         for (GamePlayer member : members.values()) {
             member.getBukkitPlayer().ifPresent(DisguiseHandler::refresh);
+            TheTowers.getInstance().getTabManager().updateLayout(member.getName());
         }
     }
 
@@ -106,6 +117,9 @@ public class GameTeam {
      * @param player the player to add to the team.
      */
     public void addMember(@NotNull GamePlayer player) {
+        members.values().forEach(member ->
+                member.sendMessage(Messages.PLAYER_JOINED_TEAM.get(player.getName())));
+
         members.put(player.getName(), player);
         player.setTeam(this);
         player.getBukkitPlayer().ifPresent(DisguiseHandler::refresh);
@@ -131,6 +145,16 @@ public class GameTeam {
      * @param player the player to remove from the team.
      */
     public void removeMember(@NotNull GamePlayer player) {
+        removeMember(player, false);
+    }
+
+    /**
+     * Removes a player from the team, updating their status to spectator and notifying other members.
+     *
+     * @param player the player to remove from the team.
+     * @param kicked true if the player was kicked from the team, false if they left voluntarily.
+     */
+    public void removeMember(@NotNull GamePlayer player, boolean kicked) {
         members.remove(player.getName());
         player.setTeam(null);
         player.getBukkitPlayer().ifPresent(DisguiseHandler::refresh);
@@ -138,6 +162,14 @@ public class GameTeam {
         TheTowers theTowers = TheTowers.getInstance();
         theTowers.getGameManager().addSpectator(player);
         theTowers.getTabManager().updateLayout(player.getName());
+
+        for (GamePlayer member : members.values()) {
+            if (kicked) {
+                member.sendMessage(Messages.PLAYER_KICKED_FROM_TEAM.get(player.getName()));
+            } else {
+                member.sendMessage(Messages.PLAYER_LEFT_TEAM.get(player.getName()));
+            }
+        }
     }
 
     /**
@@ -179,6 +211,34 @@ public class GameTeam {
     public boolean isAlive() {
         return heartHealth > 0 && members.values().stream()
                 .noneMatch(player -> !player.isAlive() || !player.isOnline());
+    }
+
+    /**
+     * Sets a new leader for the team refreshing their displays and tab layouts for all members.
+     *
+     * @param leader the new leader of the team.
+     */
+    public void setLeader(@NotNull GamePlayer leader) {
+        GamePlayer oldLeader = this.leader;
+        this.leader = leader;
+        oldLeader.getBukkitPlayer().ifPresent(DisguiseHandler::refresh);
+        leader.getBukkitPlayer().ifPresent(DisguiseHandler::refresh);
+        for (GamePlayer member : members.values()) {
+            TheTowers.getInstance().getTabManager().updateLayout(member.getName());
+        }
+    }
+
+    /**
+     * Sets the color of the team and updates all members' disguises and tab layouts.
+     *
+     * @param color the new color for the team.
+     */
+    public void setColor(@NotNull Color color) {
+        this.color = color;
+        for (GamePlayer member : members.values()) {
+            member.getBukkitPlayer().ifPresent(DisguiseHandler::refresh);
+            TheTowers.getInstance().getTabManager().updateLayout(member.getName());
+        }
     }
 
     /**

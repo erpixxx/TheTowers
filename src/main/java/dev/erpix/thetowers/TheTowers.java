@@ -3,6 +3,7 @@ package dev.erpix.thetowers;
 import dev.erpix.thetowers.command.*;
 import dev.erpix.thetowers.config.Config;
 import dev.erpix.thetowers.config.ConfigLoader;
+import dev.erpix.thetowers.config.i18n.Messages;
 import dev.erpix.thetowers.listener.EntityListener;
 import dev.erpix.thetowers.listener.PlayerListener;
 import dev.erpix.thetowers.listener.TABHandler;
@@ -62,9 +63,8 @@ public class TheTowers {
         this.libsDisguises = LibsDisguises.getInstance();
         this.commandRegistrar = new CommandRegistrar(plugin.getLifecycleManager());
         this.logger = plugin.getComponentLogger();
-        instance = this;
-
         this.config = ConfigLoader.load(plugin);
+        instance = this;
     }
 
     public static @NotNull NamespacedKey key(@NotNull String key) {
@@ -72,6 +72,8 @@ public class TheTowers {
     }
 
     public void enable() {
+        Messages.load(plugin);
+
         EventBus eventBus = TabAPI.getInstance().getEventBus();
         if (eventBus == null) {
             plugin.getComponentLogger().error(Components.color("<red>TabAPI Event Bus is not available."));
@@ -80,12 +82,12 @@ public class TheTowers {
         eventBus.register(PlayerLoadEvent.class, TABHandler.ON_PLAYER_LOAD);
 
         config.getMaps().forEach((name, map) -> {
-            GameMap converted = map.convert(name);
+            GameMap converted = map.toGameMap(name);
             this.maps.put(name, converted);
         });
         logger.info(Components.color("<green>Maps: " + String.join(", ", this.maps.keySet())));
 
-        this.lobbyLocation = config.getLobby().convert();
+        this.lobbyLocation = config.getLobby().toLocation();
 
         gameManager = new GameManager();
         this.maps.values().stream().findFirst().ifPresent(tMap -> {
@@ -117,11 +119,9 @@ public class TheTowers {
     private void registerCommands() {
         commandRegistrar.registerAll(
                 new AdminCommand(),
-                new BroadcastCommand(),
                 new GameCommand(),
                 new TeamCommand(),
                 new HelpCommand(),
-                new ProfileCommand(),
                 new RulesCommand()
         );
     }

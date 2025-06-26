@@ -32,9 +32,6 @@ public interface PlayerStat {
     PlayerStat QUARTZ_MINED = Registry.register("quartz_mined");
     PlayerStat NETHERITE_MINED = Registry.register("netherite_mined");
 
-    PlayerStat BLOCKS_PLACED = Registry.register("blocks_placed");
-    PlayerStat BLOCKS_BROKEN = Registry.register("blocks_broken");
-
     PlayerStat WOOD_GATHERED = Registry.register("wood_gathered");
 
     PlayerStat CARROT_HARVESTED = Registry.register("carrot_harvested");
@@ -46,6 +43,9 @@ public interface PlayerStat {
 
     PlayerStat ENCHANTMENTS_APPLIED = Registry.register("enchantments_applied");
     PlayerStat SUPPLY_CRATES_OPENED = Registry.register("supply_crates_opened");
+
+    PlayerStat BLOCKS_PLACED = Registry.register("blocks_placed");
+    PlayerStat BLOCKS_BROKEN = Registry.register("blocks_broken");
 
     /**
      * Retrieves a {@link PlayerStat} instance by its key.
